@@ -1,6 +1,7 @@
 package com.example.edumi.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
@@ -17,9 +18,9 @@ fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar {
         // Lista de itens com rotas, rótulos e ícones
         val items = listOf(
-            Triple("home", "Home", Icons.Default.Home),
-            Triple("events", "Inscritos", Icons.Default.Event),
-            Triple("communication", "Comunicação", Icons.Default.Chat)
+            Triple("home", "Início", Icons.Default.Home),
+            Triple("events", "Eventos", Icons.Default.Event),
+            Triple("notice", "Comunicados", Icons.Default.Campaign)
         )
         items.forEach { (route, label, icon) ->
             NavigationBarItem(

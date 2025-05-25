@@ -8,7 +8,7 @@ data class Responsavel(
     val filhos: List<Filho>,
     val email: String,
     val telefone: String,
-    val cpf: String
+    val imageRes: Int
 )
 
 
@@ -20,10 +20,11 @@ val resp = Responsavel(
             name = "Roberto Facundo",
             idade = 10,
             escola = "Universidade Federal do Ceará",
-            foto = R.drawable.robertofacundo
+            foto = R.drawable.robertofacundo,
+            turma = "5º Ano - Turma A"
         )
     ),
     email = "pedrojoao1@email.com",
     telefone = "(88) 9 XXXX - XXXX",
-    cpf = "XXX.XXX.XXX-XX"
+    imageRes = R.drawable.responsavel
 )

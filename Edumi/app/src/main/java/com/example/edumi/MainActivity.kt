@@ -43,8 +43,7 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController) {
-                        }
+                        DrawerContent(navController)
                     },
                     content = {
                         Scaffold(
