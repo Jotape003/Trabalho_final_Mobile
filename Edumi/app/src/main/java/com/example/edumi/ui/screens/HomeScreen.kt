@@ -32,7 +32,6 @@ import androidx.compose.material3.Button
 @Composable
 fun HomeScreen(navHostController: NavHostController, context: Context) {
     Column {
-        // Lista de filhos
         Text(
             text = "Seus vínculos",
             style = MaterialTheme.typography.titleMedium,
@@ -40,6 +39,7 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                 .padding(horizontal = 24.dp)
                 .padding(top = 8.dp)
         )
+
         LazyColumn(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -62,7 +62,6 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                 modifier = Modifier
                                     .size(64.dp)
                                     .clip(CircleShape),
-                                modifier = Modifier.size(64.dp).clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
 
@@ -74,9 +73,7 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                 Text(
                                     text = filho.name,
                                     style = MaterialTheme.typography.titleMedium
-                                    style = MaterialTheme.typography.titleMedium,
-
-                                    )
+                                )
 
                                 Text(
                                     text = filho.escola,
@@ -88,16 +85,9 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        // Descrição do evento
-                        Text(
-                            text = "Escola: ${filho.escola}",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                                    text = filho.turma,
+
+                                Text(
+                                    text = "Turma: ${filho.turma}",
                                     style = MaterialTheme.typography.titleSmall
                                 )
                             }
@@ -107,18 +97,11 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
 
                         Button(
                             onClick = {
-                                 navController.navigate("ChildrenDetails/${filho.id}")
+                                navHostController.navigate("ChildrenDetails/${filho.id}")
                             },
-                            modifier =
-                                Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Ver mais informações a respeito do(a) ${filho.name}"
-                            )
-                            onClick = {},
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(text = "Ver mais")
+                            Text(text = "Ver mais informações a respeito do(a) ${filho.name}")
                         }
                     }
                 }

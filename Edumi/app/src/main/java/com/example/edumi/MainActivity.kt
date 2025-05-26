@@ -146,9 +146,12 @@ class MainActivity : ComponentActivity() {
                                         Text("Filho não encontrado.")
                                     }
 
+                                }
                                 composable("settings") {
                                     SettingsScreen(
-                                        onThemeToggle = { isDarkTheme.value = !isDarkTheme.value }
+                                        onThemeToggle = {
+                                            isDarkTheme.value = !isDarkTheme.value
+                                        }
                                     )
                                 }
 
@@ -163,8 +166,7 @@ class MainActivity : ComponentActivity() {
                                 //}
                             }
                         }
-                    }
-                )
+                    })
             }
         }
     }
