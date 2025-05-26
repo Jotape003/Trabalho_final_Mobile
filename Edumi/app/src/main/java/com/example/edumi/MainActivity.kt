@@ -27,7 +27,9 @@ import com.example.edumi.ui.screens.ChildrenEvents
 import com.example.edumi.ui.screens.ChildrenFrequency
 import com.example.edumi.ui.screens.ChildrenNotifications
 import com.example.edumi.ui.screens.ChildrenScores
+import com.example.edumi.ui.screens.HelpScreen
 import com.example.edumi.ui.screens.HomeScreen
+import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 
@@ -45,18 +47,17 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController) {
-                        }
+                        DrawerContent(navController, drawerState, scope)
                     },
                     content = {
                         Scaffold(
                             topBar = {
                                 TopBar(
-                                    onThemeToggle = { isDarkTheme.value = !isDarkTheme.value },
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
                                     onSearchClick = {
                                         // TEM QUE CONFIGURAR BEM AQUI
-                                    }
+                                    },
+                                    navController = navController
                                 )
                             },
 
@@ -144,6 +145,15 @@ class MainActivity : ComponentActivity() {
                                     } else {
                                         Text("Filho não encontrado.")
                                     }
+
+                                composable("settings") {
+                                    SettingsScreen(
+                                        onThemeToggle = { isDarkTheme.value = !isDarkTheme.value }
+                                    )
+                                }
+
+                                composable("help") {
+                                    HelpScreen()
                                 }
                                 //composable("events") { SubscribedEventsScreen(navController) }
                                 //composable("favorites") { FavoritesScreen(navController) }

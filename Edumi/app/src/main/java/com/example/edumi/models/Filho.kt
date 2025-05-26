@@ -6,5 +6,6 @@ data class Filho(
     val idade: Int,
     val escola: String,
     val foto: Int,
+    val turma: String
 )
 
