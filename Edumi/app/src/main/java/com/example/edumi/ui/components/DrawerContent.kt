@@ -89,7 +89,13 @@ fun DrawerContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp),
+                    .height(40.dp)
+                    .clickable {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        navController.navigate("profile")
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(modifier = Modifier.width(16.dp))

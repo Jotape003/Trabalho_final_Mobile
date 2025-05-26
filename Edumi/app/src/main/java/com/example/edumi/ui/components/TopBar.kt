@@ -31,6 +31,7 @@ fun TopBar(
         "home" -> "Edumi"
         "settings" -> "Configurações"
         "help" -> "Ajuda"
+        "profile" -> "Perfil"
         else -> "Edumi"
     }
 
