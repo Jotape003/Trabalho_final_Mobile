@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,6 +32,7 @@ import androidx.compose.material3.Button
 @Composable
 fun HomeScreen(navHostController: NavHostController, context: Context) {
     Column {
+        // Lista de filhos
         Text(
             text = "Seus vínculos",
             style = MaterialTheme.typography.titleMedium,
@@ -56,6 +59,9 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                             Image(
                                 painter = painterResource(id = filho.foto),
                                 contentDescription = filho.name,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape),
                                 modifier = Modifier.size(64.dp).clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
@@ -67,6 +73,7 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                             ) {
                                 Text(
                                     text = filho.name,
+                                    style = MaterialTheme.typography.titleMedium
                                     style = MaterialTheme.typography.titleMedium,
 
                                     )
@@ -77,6 +84,19 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                 )
 
                                 Text(
+                                    text = "Idade: ${filho.idade}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // Descrição do evento
+                        Text(
+                            text = "Escola: ${filho.escola}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
                                     text = filho.turma,
                                     style = MaterialTheme.typography.titleSmall
                                 )
@@ -86,6 +106,15 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Button(
+                            onClick = {
+                                 navController.navigate("ChildrenDetails/${filho.id}")
+                            },
+                            modifier =
+                                Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Ver mais informações a respeito do(a) ${filho.name}"
+                            )
                             onClick = {},
                             modifier = Modifier.fillMaxWidth()
                         ) {
