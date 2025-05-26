@@ -26,6 +26,7 @@ import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
 import com.example.edumi.ui.screens.HomeScreen
+import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 
@@ -43,17 +44,17 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController)
+                        DrawerContent(navController, drawerState, scope)
                     },
                     content = {
                         Scaffold(
                             topBar = {
                                 TopBar(
-                                    onThemeToggle = { isDarkTheme.value = !isDarkTheme.value },
                                     onOpenDrawer = { scope.launch { drawerState.open() } },
                                     onSearchClick = {
                                         // TEM QUE CONFIGURAR BEM AQUI
-                                    }
+                                    },
+                                    navController = navController
                                 )
                             },
 
@@ -70,6 +71,12 @@ class MainActivity : ComponentActivity() {
                                     HomeScreen(
                                         navController,
                                         context = LocalContext.current
+                                    )
+                                }
+
+                                composable("settings") {
+                                    SettingsScreen(
+                                        onThemeToggle = { isDarkTheme.value = !isDarkTheme.value }
                                     )
                                 }
                                 //composable("events") { SubscribedEventsScreen(navController) }
