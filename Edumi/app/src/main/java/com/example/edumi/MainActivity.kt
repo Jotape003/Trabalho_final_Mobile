@@ -3,8 +3,6 @@ package com.example.edumi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,19 +10,23 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.edumi.models.resp
 import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
+import com.example.edumi.ui.screens.ChildrenDetails
+import com.example.edumi.ui.screens.ChildrenEvents
+import com.example.edumi.ui.screens.ChildrenFrequency
+import com.example.edumi.ui.screens.ChildrenNotifications
+import com.example.edumi.ui.screens.ChildrenScores
 import com.example.edumi.ui.screens.HomeScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
@@ -73,11 +75,81 @@ class MainActivity : ComponentActivity() {
                                         context = LocalContext.current
                                     )
                                 }
+                                composable("ChildrenDetails/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenDetails(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+                                composable("ChildrenScores/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenScores(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+                                composable("ChildrenNotifications/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenNotifications(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+                                composable("ChildrenEvents/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenEvents(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+                                composable("ChildrenFrequency/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenFrequency(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
                                 //composable("events") { SubscribedEventsScreen(navController) }
                                 //composable("favorites") { FavoritesScreen(navController) }
                                 //composable("eventDetails/{eventId}") { backStackEntry ->
-                                 //   val eventId = backStackEntry.arguments?.getString("eventId")
-                                   // EventDetailsScreen(eventId = eventId)
+                                //   val eventId = backStackEntry.arguments?.getString("eventId")
+                                // EventDetailsScreen(eventId = eventId)
                                 //}
                             }
                         }

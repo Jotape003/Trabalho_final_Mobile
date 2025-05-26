@@ -5,12 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,11 +21,11 @@ import com.example.edumi.models.resp
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context) {
     Column {
-        // Seção principal com a lista de todos os eventos
+        // Lista de filhos
         LazyColumn(
             modifier = Modifier.padding(16.dp)
         ) {
-            item {
+            items(resp.filhos) { filho ->
                 Card(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
@@ -44,8 +41,8 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Image(
-                                painter = painterResource(id = resp.filhos[0].foto),
-                                contentDescription = resp.filhos[0].name,
+                                painter = painterResource(id = filho.foto),
+                                contentDescription = filho.name,
                                 modifier = Modifier
                                     .size(64.dp)
                                     .clip(CircleShape),
@@ -56,11 +53,11 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text(
-                                    text = resp.filhos[0].name,
+                                    text = filho.name,
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
-                                    text = "Idade: ${resp.filhos[0].idade}",
+                                    text = "Idade: ${filho.idade}",
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -69,7 +66,7 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                         Spacer(modifier = Modifier.height(8.dp))
                         // Descrição do evento
                         Text(
-                            text = "Escola: ${resp.filhos[0].escola}",
+                            text = "Escola: ${filho.escola}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -78,13 +75,13 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                         // Botão "Ver mais sobre"
                         Button(
                             onClick = {
-                                // navController.navigate()
+                                 navController.navigate("ChildrenDetails/${filho.id}")
                             },
                             modifier =
                                 Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "Ver mais informações a respeito do(a) ${resp.filhos[0].name}"
+                                text = "Ver mais informações a respeito do(a) ${filho.name}"
                             )
                         }
                     }
