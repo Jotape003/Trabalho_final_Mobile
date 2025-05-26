@@ -19,13 +19,16 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +46,8 @@ fun DrawerContent(
     drawerState: DrawerState,
     scope: CoroutineScope
 ) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier
             .fillMaxHeight()
@@ -167,7 +172,10 @@ fun DrawerContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp),
+                    .height(40.dp)
+                    .clickable {
+                        showLogoutDialog = true
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(modifier = Modifier.width(16.dp))
@@ -183,6 +191,38 @@ fun DrawerContent(
                 Text(
                     text = "Sair",
                     color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showLogoutDialog = false
+                    },
+                    title = {
+                        Text(text = "Confirmar saída")
+                    },
+                    text = {
+                        Text("Tem certeza de que deseja sair?")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showLogoutDialog = false
+                            }
+                        ) {
+                            Text("Sim")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showLogoutDialog = false
+                            }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
                 )
             }
         }
