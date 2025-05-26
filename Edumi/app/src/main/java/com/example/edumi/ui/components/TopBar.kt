@@ -30,6 +30,7 @@ fun TopBar(
     val title = when (currentRoute) {
         "home" -> "Edumi"
         "settings" -> "Configurações"
+        "help" -> "Ajuda"
         else -> "Edumi"
     }
 

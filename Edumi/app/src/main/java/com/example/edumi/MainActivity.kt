@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
+import com.example.edumi.ui.screens.HelpScreen
 import com.example.edumi.ui.screens.HomeScreen
 import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
@@ -78,6 +79,10 @@ class MainActivity : ComponentActivity() {
                                     SettingsScreen(
                                         onThemeToggle = { isDarkTheme.value = !isDarkTheme.value }
                                     )
+                                }
+
+                                composable("help") {
+                                    HelpScreen()
                                 }
                                 //composable("events") { SubscribedEventsScreen(navController) }
                                 //composable("favorites") { FavoritesScreen(navController) }
