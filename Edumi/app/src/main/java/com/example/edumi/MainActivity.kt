@@ -23,6 +23,7 @@ import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
 import com.example.edumi.ui.screens.AllChildrenEvents
+import com.example.edumi.ui.screens.AllNotifications
 import com.example.edumi.ui.screens.ChildrenDetails
 import com.example.edumi.ui.screens.ChildrenEvents
 import com.example.edumi.ui.screens.ChildrenFrequency
@@ -79,6 +80,12 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("events") {
                                     AllChildrenEvents(
+                                        navController = navController,
+                                        context = LocalContext.current,
+                                    )
+                                }
+                                composable("notice"){
+                                    AllNotifications(
                                         navController = navController,
                                         context = LocalContext.current,
                                     )
