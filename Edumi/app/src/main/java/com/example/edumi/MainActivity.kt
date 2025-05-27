@@ -22,6 +22,7 @@ import com.example.edumi.models.resp
 import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
+import com.example.edumi.ui.screens.AllChildrenEvents
 import com.example.edumi.ui.screens.ChildrenDetails
 import com.example.edumi.ui.screens.ChildrenEvents
 import com.example.edumi.ui.screens.ChildrenFrequency
@@ -74,6 +75,12 @@ class MainActivity : ComponentActivity() {
                                     HomeScreen(
                                         navController,
                                         context = LocalContext.current
+                                    )
+                                }
+                                composable("events") {
+                                    AllChildrenEvents(
+                                        navController = navController,
+                                        context = LocalContext.current,
                                     )
                                 }
                                 composable("ChildrenDetails/{id}") { backStackEntry ->
