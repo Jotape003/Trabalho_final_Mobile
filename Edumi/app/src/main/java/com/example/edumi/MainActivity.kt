@@ -29,6 +29,7 @@ import com.example.edumi.ui.screens.ChildrenEvents
 import com.example.edumi.ui.screens.ChildrenFrequency
 import com.example.edumi.ui.screens.ChildrenNotifications
 import com.example.edumi.ui.screens.ChildrenScores
+import com.example.edumi.ui.screens.ChildrenTask
 import com.example.edumi.ui.screens.HelpScreen
 import com.example.edumi.ui.screens.HomeScreen
 import com.example.edumi.ui.screens.SettingsScreen
@@ -152,6 +153,21 @@ class MainActivity : ComponentActivity() {
 
                                     if (filho != null) {
                                         ChildrenFrequency(
+                                            navController = navController,
+                                            context = LocalContext.current,
+                                            filho = filho
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+
+                                }
+                                composable("ChildrenTask/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    val filho = resp.filhos.find { it.id.toString() == id }
+
+                                    if (filho != null) {
+                                        ChildrenTask(
                                             navController = navController,
                                             context = LocalContext.current,
                                             filho = filho
