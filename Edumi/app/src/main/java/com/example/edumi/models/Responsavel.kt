@@ -23,6 +23,14 @@ val resp = Responsavel(
             escola = "Universidade Federal do Ceará",
             foto = R.drawable.robertofacundo,
             turma = "5º Ano - Turma A"
+        ),
+        Filho(
+            id = 2,
+            name = "Ana Januária",
+            idade = 12,
+            escola = "Seminário Batista do Cariri",
+            foto = R.drawable.anajanuaria,
+            turma = "7° Ano - Turma A"
         )
     ),
     email = "pedrojoao1@email.com",

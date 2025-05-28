@@ -93,7 +93,7 @@ fun ChildrenDetails(navController: NavHostController, context: Context, filho: F
 
                 Button(
                     onClick = {
-                        // navController.navigate()
+                        navController.navigate("ChildrenTask/${filho.id}")
                     },
                     modifier =
                         Modifier.fillMaxWidth()

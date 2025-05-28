@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.edumi"
-        minSdk = 34
+        minSdk = 30
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -52,7 +52,6 @@ dependencies {
     implementation ("androidx.core:core-splashscreen:1.0.1")
     implementation ("androidx.compose.material:material-icons-core:1.x.x")
     implementation ("androidx.compose.material:material-icons-extended:1.x.x")
-    // Notificações
     implementation ("androidx.core:core-ktx:1.10.1")
 
     implementation(libs.androidx.core.ktx)
