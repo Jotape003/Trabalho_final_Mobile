@@ -32,6 +32,7 @@ import com.example.edumi.ui.screens.ChildrenScores
 import com.example.edumi.ui.screens.ChildrenTask
 import com.example.edumi.ui.screens.HelpScreen
 import com.example.edumi.ui.screens.HomeScreen
+import com.example.edumi.ui.screens.ProfileScreen
 import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
@@ -187,6 +188,10 @@ class MainActivity : ComponentActivity() {
 
                                 composable("help") {
                                     HelpScreen()
+                                }
+
+                                composable("profile") {
+                                    ProfileScreen()
                                 }
                                 //composable("events") { SubscribedEventsScreen(navController) }
                                 //composable("favorites") { FavoritesScreen(navController) }
