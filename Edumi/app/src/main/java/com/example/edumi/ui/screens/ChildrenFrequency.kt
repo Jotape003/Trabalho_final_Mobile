@@ -2,6 +2,13 @@ package com.example.edumi.ui.screens
 
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +28,7 @@ import androidx.navigation.NavController
 import com.example.edumi.models.Filho
 import com.example.edumi.models.eventos
 import com.example.edumi.models.frequencias
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -28,8 +36,15 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ChildrenFrequency(navController: NavController, context: Context, filho: Filho) {
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        delay(2000) // Simula delay
+        isLoading = false
+    }
+
     val frequenciasFilho = remember { frequencias.filter { it.idFilho == filho.id } }
     val today = remember { LocalDate.now() }
 
@@ -52,66 +67,93 @@ fun ChildrenFrequency(navController: NavController, context: Context, filho: Fil
         (totalFaltas.toDouble() / totalAulasRegistradas * 100).roundToInt()
     } else 0
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Frequência de ${filho.name} em ${
-                currentMonth.month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
-            }",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7),
-            modifier = Modifier.height(300.dp)
-        ) {
-            items(days) { date ->
-                val freqDoDia = frequenciasFilho.find { it.data == date }
+    AnimatedContent(
+        targetState = isLoading,
+        transitionSpec = {
+            (fadeIn() + expandVertically()) with (fadeOut() + shrinkVertically())
+        },
+        label = "Loading or frequency"
+    ) { loading ->
 
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .aspectRatio(1f),
-                    contentAlignment = Alignment.Center
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Frequência de ${filho.name} em ${
+                        currentMonth.month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(7),
+                    modifier = Modifier.height(300.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = date?.dayOfMonth?.toString() ?: "")
-                        if (freqDoDia != null) {
-                            val cor = if (freqDoDia.presente) Color(0xFF4CAF50) else Color(0xFFF44336)
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .padding(top = 2.dp)
-                                    .background(color = cor, shape = CircleShape)
-                            )
+                    items(days) { date ->
+                        val freqDoDia = frequenciasFilho.find { it.data == date }
+
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .aspectRatio(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = date?.dayOfMonth?.toString() ?: "")
+                                if (freqDoDia != null) {
+                                    val cor =
+                                        if (freqDoDia.presente) Color(0xFF4CAF50) else Color(
+                                            0xFFF44336
+                                        )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .padding(top = 2.dp)
+                                            .background(color = cor, shape = CircleShape)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-        // Resumo do mês
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(6.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Resumo do mês", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Presenças: ${totalPresencas}", color = Color(0xFF4CAF50))
-                Text("Faltas: ${totalFaltas}", color = Color(0xFFF44336))
-                Text("Faltou ${percentualFaltas}% das aulas de ${
-                    currentMonth.month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
-                }")
+                // Resumo do mês
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Resumo do mês", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Presenças: ${totalPresencas}", color = Color(0xFF4CAF50))
+                        Text("Faltas: ${totalFaltas}", color = Color(0xFFF44336))
+                        Text(
+                            "Faltou ${percentualFaltas}% das aulas de ${
+                                currentMonth.month.getDisplayName(
+                                    TextStyle.FULL,
+                                    Locale("pt", "BR")
+                                )
+                            }"
+                        )
+                    }
+                }
             }
+
         }
     }
 }

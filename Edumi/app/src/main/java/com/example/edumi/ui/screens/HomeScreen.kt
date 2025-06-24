@@ -1,10 +1,13 @@
 package com.example.edumi.ui.screens
 
 import android.content.Context
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,80 +31,100 @@ import androidx.navigation.NavHostController
 import com.example.edumi.models.resp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(navHostController: NavHostController, context: Context) {
-    Column {
-        Text(
-            text = "Seus vínculos",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(top = 8.dp)
-        )
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        delay(2000) // Simula delay
+        isLoading = false
+    }
+    Crossfade(targetState = isLoading, label = "") { loading ->
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column {
+                Text(
+                    text = "Seus vínculos",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp)
+                )
 
-        LazyColumn(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            items(resp.filhos) { filho ->
-                Card(
-                    modifier = Modifier.padding(8.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                LazyColumn(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth()
+                    items(resp.filhos) { filho ->
+                        Card(
+                            modifier = Modifier.padding(8.dp),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
-                            Image(
-                                painter = painterResource(id = filho.foto),
-                                contentDescription = filho.name,
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
                             Column(
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
                             ) {
-                                Text(
-                                    text = filho.name,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = filho.foto),
+                                        contentDescription = filho.name,
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
 
-                                Text(
-                                    text = filho.escola,
-                                    style = MaterialTheme.typography.titleSmall,
-                                )
+                                    Spacer(modifier = Modifier.width(16.dp))
 
-                                Text(
-                                    text = "Idade: ${filho.idade}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = filho.name,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
 
-                                Text(
-                                    text = "Turma: ${filho.turma}",
-                                    style = MaterialTheme.typography.titleSmall
-                                )
+                                        Text(
+                                            text = filho.escola,
+                                            style = MaterialTheme.typography.titleSmall,
+                                        )
+
+                                        Text(
+                                            text = "Idade: ${filho.idade}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+
+                                        Text(
+                                            text = "Turma: ${filho.turma}",
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        navHostController.navigate("ChildrenDetails/${filho.id}")
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(text = "Ver mais informações a respeito do(a) ${filho.name}")
+                                }
                             }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Button(
-                            onClick = {
-                                navHostController.navigate("ChildrenDetails/${filho.id}")
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = "Ver mais informações a respeito do(a) ${filho.name}")
                         }
                     }
                 }

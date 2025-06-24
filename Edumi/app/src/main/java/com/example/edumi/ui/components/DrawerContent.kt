@@ -70,6 +70,7 @@ fun DrawerContent(
                     modifier = Modifier
                         .padding(vertical = 16.dp)
                         .size(50.dp)
+
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
