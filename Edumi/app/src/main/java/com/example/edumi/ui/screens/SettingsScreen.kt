@@ -21,17 +21,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.edumi.models.eventos
-import com.example.edumi.notifications.agendarNotificacaoEvento
-import com.example.edumi.notifications.cancelarNotificacaoEvento
 
 @Composable
 fun SettingsScreen(onThemeToggle: () -> Unit) {
     var isDarkModeEnabled by remember { mutableStateOf(false) }
     var isNotificationsEnabled by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+
 
     Column(
         modifier = Modifier
@@ -82,17 +78,8 @@ fun SettingsScreen(onThemeToggle: () -> Unit) {
 
             Switch(
                 checked = isNotificationsEnabled,
-                onCheckedChange = { enable ->
-                    isNotificationsEnabled = enable
-                    if (enable){
-                        eventos.forEach { evento ->
-                            agendarNotificacaoEvento(context, evento)
-                        }
-                    } else {
-                        eventos.forEach { evento ->
-                            cancelarNotificacaoEvento(context, evento)
-                        }
-                    }
+                onCheckedChange = {
+                    isNotificationsEnabled = it
                 }
             )
         }
