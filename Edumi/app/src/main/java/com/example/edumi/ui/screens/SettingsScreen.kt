@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SettingsScreen(onThemeToggle: () -> Unit) {
-    var isDarkModeEnabled by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    isDarkTheme: Boolean,
+    onThemeToggle: () -> Unit
+) {
     var isNotificationsEnabled by remember { mutableStateOf(false) }
 
 
@@ -52,9 +54,8 @@ fun SettingsScreen(onThemeToggle: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
 
             Switch(
-                checked = isDarkModeEnabled,
+                checked = isDarkTheme,
                 onCheckedChange = {
-                    isDarkModeEnabled = it
                     onThemeToggle()
                 }
             )
