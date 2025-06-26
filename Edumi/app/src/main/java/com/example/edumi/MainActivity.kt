@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -47,6 +48,9 @@ import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import com.example.edumi.models.eventos
+import com.example.edumi.notifications.agendarNotificacaoEvento
+import com.example.edumi.notifications.cancelarNotificacaoEvento
 
 
 @ExperimentalMaterial3Api
@@ -84,6 +88,8 @@ class MainActivity : ComponentActivity() {
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val scope = rememberCoroutineScope()
             val isDarkTheme by preferences.isDarkMode.collectAsState(initial = false)
+            val isNotificationsEnabled by preferences.isNotificationsEnabled.collectAsState(initial = false)
+
             EdumiTheme(darkTheme = isDarkTheme) {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
@@ -220,9 +226,25 @@ class MainActivity : ComponentActivity() {
                                 composable("settings") {
                                     SettingsScreen(
                                         isDarkTheme = isDarkTheme,
+                                        isNotificationsEnabled = isNotificationsEnabled,
                                         onThemeToggle = {
                                             scope.launch {
                                                 preferences.setDarkMode(!isDarkTheme)
+                                            }
+                                        },
+                                        onNotificationsToggle = {
+                                            scope.launch {
+                                                preferences.setNotificationsEnabled(!isNotificationsEnabled)
+                                            }
+                                            Log.d("VSF", "$isNotificationsEnabled")
+                                            if (isNotificationsEnabled){
+                                                eventos.forEach { evento ->
+                                                    agendarNotificacaoEvento(context, evento)
+                                                }
+                                            } else {
+                                                eventos.forEach { evento ->
+                                                    cancelarNotificacaoEvento(context, evento)
+                                                }
                                             }
                                         }
                                     )

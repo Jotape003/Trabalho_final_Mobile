@@ -30,9 +30,10 @@ import com.example.edumi.notifications.cancelarNotificacaoEvento
 @Composable
 fun SettingsScreen(
     isDarkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    isNotificationsEnabled: Boolean,
+    onThemeToggle: () -> Unit,
+    onNotificationsToggle: () -> Unit
 ) {
-    var isNotificationsEnabled by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Column(
@@ -82,18 +83,9 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Switch(
-                checked = isNotificationsEnabled,
-                onCheckedChange = { enable ->
-                    isNotificationsEnabled = enable
-                    if (enable){
-                        eventos.forEach { evento ->
-                            agendarNotificacaoEvento(context, evento)
-                        }
-                    } else {
-                        eventos.forEach { evento ->
-                            cancelarNotificacaoEvento(context, evento)
-                        }
-                    }
+                checked = !isNotificationsEnabled,
+                onCheckedChange = {
+                    onNotificationsToggle()
                 }
             )
         }
