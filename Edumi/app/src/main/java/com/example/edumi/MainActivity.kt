@@ -144,7 +144,6 @@ class MainActivity : ComponentActivity() {
                                     if (filho != null) {
                                         ChildrenDetails(
                                             navController = navController,
-                                            context = context,
                                             filho = filho
                                         )
                                     } else {

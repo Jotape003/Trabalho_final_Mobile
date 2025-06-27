@@ -3,6 +3,7 @@ package com.example.edumi.ui.screens
 import android.content.Context
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.edumi.models.resp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,7 +69,11 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                 ) {
                     items(resp.filhos) { filho ->
                         Card(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable() {
+                                    navHostController.navigate("ChildrenDetails/${filho.id}")
+                                },
                             elevation = CardDefaults.cardElevation(4.dp)
                         ) {
                             Column(
@@ -112,17 +119,6 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                             style = MaterialTheme.typography.titleSmall
                                         )
                                     }
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Button(
-                                    onClick = {
-                                        navHostController.navigate("ChildrenDetails/${filho.id}")
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(text = "Ver mais informações a respeito do(a) ${filho.name}")
                                 }
                             }
                         }

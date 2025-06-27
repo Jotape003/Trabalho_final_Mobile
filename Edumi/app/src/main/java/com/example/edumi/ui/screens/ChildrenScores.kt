@@ -8,13 +8,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.edumi.models.Filho
@@ -43,30 +46,94 @@ fun ChildrenScores(navController: NavController, context: Context, filho: Filho)
                 CircularProgressIndicator()
             }
         } else {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
 
                 Text(
                     text = "Notas de ${filho.name}",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Cabeçalho da "tabela"
-                Row(modifier = Modifier.padding(bottom = 8.dp)) {
-                    Text(text = "Disciplina", modifier = Modifier.weight(1f))
-                    Text(text = "Semestre", modifier = Modifier.weight(1f))
-                    Text(text = "Nota", modifier = Modifier.weight(1f))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(vertical = 8.dp, horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = "Disciplina",
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                    Text(
+                        text = "Semestre",
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                    Text(
+                        text = "Nota",
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            textAlign = TextAlign.Center
+                        )
+                    )
                 }
 
-                // Linhas da "tabela"
-                notas.forEach { nota ->
-                    Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                        Text(text = nota.disciplina, modifier = Modifier.weight(1f))
-                        Text(text = nota.semestre, modifier = Modifier.weight(1f))
-                        Text(text = nota.nota.toString(), modifier = Modifier.weight(1f))
+                notas.forEachIndexed { index, nota ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp, horizontal = 12.dp)
+                    ) {
+                        Text(
+                            text = nota.disciplina,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                        Text(
+                            text = nota.semestre,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                        Text(
+                            text = nota.nota.toString(),
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+
+                    if (index != notas.lastIndex) {
+                        Divider(
+                            modifier = Modifier.padding(horizontal = 12.dp),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            thickness = 1.dp
+                        )
                     }
                 }
             }
