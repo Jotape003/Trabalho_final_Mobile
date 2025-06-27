@@ -81,12 +81,27 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
                     modifier = Modifier.weight(1f)
                 ) { page ->
                     val currentMonth = indexToYearMonth(page)
-                    val daysInMonth = currentMonth.lengthOfMonth()
-                    val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value % 7
 
-                    val days = buildList {
-                        repeat(firstDayOfMonth) { add(null) }
-                        repeat(daysInMonth) { add(currentMonth.atDay(it + 1)) }
+                    val days = remember(currentMonth) {
+                        val previousMonth = currentMonth.minusMonths(1)
+                        val nextMonth = currentMonth.plusMonths(1)
+
+                        val daysInMonth = currentMonth.lengthOfMonth()
+                        val firstDayOfMonth = currentMonth.atDay(1).dayOfWeek.value % 7
+                        val daysBefore = firstDayOfMonth
+                        val daysAfter = (7 - ((daysInMonth + daysBefore) % 7)).let { if (it == 7) 0 else it }
+
+                        val previousMonthDays = (previousMonth.lengthOfMonth() - daysBefore + 1..previousMonth.lengthOfMonth()).map {
+                            previousMonth.atDay(it) to true
+                        }
+                        val currentMonthDays = (1..daysInMonth).map {
+                            currentMonth.atDay(it) to false
+                        }
+                        val nextMonthDays = (1..daysAfter).map {
+                            nextMonth.atDay(it) to true
+                        }
+
+                        previousMonthDays + currentMonthDays + nextMonthDays
                     }
 
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -98,23 +113,36 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            val diasSemana = listOf("Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb")
+                            diasSemana.forEach { dia ->
+                                Text(
+                                    text = dia,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(7),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            items(days) { date ->
-                                val hasEvent = date != null && eventosFilho.any { it.data == date }
+                            items(days) { (date, isFromOtherMonth) ->
                                 val isSelected = date == selectedDate
+                                val hasEvent = eventosFilho.any { it.data == date }
 
                                 Box(
                                     modifier = Modifier
                                         .padding(4.dp)
                                         .aspectRatio(1f)
-                                        .clickable(enabled = date != null) {
-                                            if (date != null) selectedDate = date
-                                        }
+                                        .clickable { selectedDate = date }
                                         .background(
                                             if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                             else Color.Transparent
@@ -123,8 +151,10 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
-                                            text = date?.dayOfMonth?.toString() ?: "",
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                            text = date.dayOfMonth.toString(),
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (!isFromOtherMonth) MaterialTheme.colorScheme.onBackground
+                                            else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
                                         )
                                         if (hasEvent) {
                                             Box(
@@ -132,7 +162,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
                                                     .size(5.dp)
                                                     .padding(top = 2.dp)
                                                     .background(
-                                                        Color.Blue,
+                                                        if (!isFromOtherMonth) Color.Blue else Color.Blue.copy(alpha = 0.4f),
                                                         shape = CircleShape
                                                     )
                                             )
@@ -146,7 +176,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
 
                         val eventosDoDia = eventosFilho.filter { it.data == selectedDate }
 
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                             Text(
                                 text = "Eventos de ${selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
                                 style = MaterialTheme.typography.titleMedium
