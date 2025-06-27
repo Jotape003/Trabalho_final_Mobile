@@ -8,31 +8,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.with
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.comunicados
 import com.example.edumi.models.tasks
 import kotlinx.coroutines.delay
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -43,50 +33,69 @@ fun ChildrenTask(navController: NavHostController, context: Context, filho: Filh
         delay(2000) // Simula delay
         isLoading = false
     }
+
     AnimatedContent(
         targetState = isLoading,
         transitionSpec = {
             (fadeIn() + expandVertically()) with (fadeOut() + shrinkVertically())
         },
-        label = "Loading or Scores"
+        label = "Loading or Tasks"
     ) { loading ->
         if (loading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+            ) {
                 Text(
                     text = "Atividades de ${filho.name}",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                LazyColumn {
-                    items(tasksDoFilho.size) { index ->
-                        val task = tasksDoFilho[index]
+                if (tasksDoFilho.isEmpty()) {
+                    Text(
+                        text = "Nenhuma atividade encontrada.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 32.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(tasksDoFilho.size) { index ->
+                            val task = tasksDoFilho[index]
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Text(
-                                text = task.titulo,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                            Text(
-                                text = task.descricao,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                            Text(
-                                text = "Prazo: ${task.data.toString()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(16.dp)
-                            )
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = task.titulo,
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = task.descricao,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        maxLines = 4,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Prazo: ${task.data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

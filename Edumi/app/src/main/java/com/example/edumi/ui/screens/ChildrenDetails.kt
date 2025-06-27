@@ -33,7 +33,7 @@ fun ChildrenDetails(navController: NavHostController, filho: Filho) {
         CardInfo("Frequência", Icons.Default.CalendarMonth) { navController.navigate("ChildrenFrequency/${filho.id}") },
         CardInfo("Eventos", Icons.Default.Event) { navController.navigate("ChildrenEvents/${filho.id}") },
         CardInfo("Comunicados", Icons.Default.Campaign) { navController.navigate("ChildrenNotifications/${filho.id}") },
-        CardInfo("Tarefas", Icons.Default.Checklist) { navController.navigate("ChildrenTask/${filho.id}") }
+        CardInfo("Atividades", Icons.Default.Checklist) { navController.navigate("ChildrenTask/${filho.id}") }
     )
 
     Column(modifier = Modifier.padding(16.dp)) {
