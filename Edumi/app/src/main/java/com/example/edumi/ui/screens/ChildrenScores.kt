@@ -55,7 +55,10 @@ fun ChildrenScores(navController: NavController, context: Context, filho: Filho)
                 Text(
                     text = "Notas de ${filho.name}",
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
 
                 Row(

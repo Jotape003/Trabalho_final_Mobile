@@ -11,8 +11,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -109,7 +115,17 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
 
-                            bottomBar = { BottomNavigationBar(navController) }
+                            bottomBar = { BottomNavigationBar(navController) },
+
+                            floatingActionButton = {
+                                FloatingActionButton(
+                                    onClick = {},
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                                }
+                            }
 
                         ) { innerPadding ->
                             NavHost(

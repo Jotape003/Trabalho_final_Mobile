@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material3.Card
@@ -33,7 +34,8 @@ fun ChildrenDetails(navController: NavHostController, filho: Filho) {
         CardInfo("Frequência", Icons.Default.CalendarMonth) { navController.navigate("ChildrenFrequency/${filho.id}") },
         CardInfo("Eventos", Icons.Default.Event) { navController.navigate("ChildrenEvents/${filho.id}") },
         CardInfo("Comunicados", Icons.Default.Campaign) { navController.navigate("ChildrenNotifications/${filho.id}") },
-        CardInfo("Atividades", Icons.Default.Checklist) { navController.navigate("ChildrenTask/${filho.id}") }
+        CardInfo("Atividades", Icons.Default.Checklist) { navController.navigate("ChildrenTask/${filho.id}") },
+        CardInfo("Editar", Icons.Default.Edit) {navController.navigate("")}
     )
 
     Column(modifier = Modifier.padding(16.dp)) {
