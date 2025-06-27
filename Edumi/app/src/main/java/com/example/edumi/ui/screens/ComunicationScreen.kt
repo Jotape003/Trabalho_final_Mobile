@@ -8,12 +8,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,7 +41,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun AllNotifications(navController: NavHostController, context: Context) {
     val allComunicados = remember { comunicados }
-
     val allFilhos = remember { resp.filhos }
 
     var isLoading by remember { mutableStateOf(true) }
@@ -45,6 +48,7 @@ fun AllNotifications(navController: NavHostController, context: Context) {
         delay(2000) // Simula delay
         isLoading = false
     }
+
     AnimatedContent(
         targetState = isLoading,
         transitionSpec = {
@@ -59,12 +63,12 @@ fun AllNotifications(navController: NavHostController, context: Context) {
         } else {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Todos os Comunicados",
-                    style = MaterialTheme.typography.titleLarge,
+                    text = "Todos os comunicados",
+                    style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                LazyColumn {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (allComunicados.isEmpty()) {
                         item {
                             Text("Nenhum comunicado disponível.")
@@ -76,19 +80,33 @@ fun AllNotifications(navController: NavHostController, context: Context) {
                                 ?: "Filho Desconhecido"
 
                             Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text(
-                                        text = "${comunicado.tipo} (${nomeDoFilho})",
+                                        text = comunicado.tipo,
                                         style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Text(
+                                        text = "Para: $nomeDoFilho",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
                                     Text(
                                         text = comunicado.texto,
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
                             }
