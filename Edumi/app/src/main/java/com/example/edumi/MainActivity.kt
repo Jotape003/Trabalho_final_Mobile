@@ -46,9 +46,11 @@ import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.edumi.models.eventos
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
+import com.example.edumi.ui.screens.ChildForm
 
 
 @ExperimentalMaterial3Api
@@ -58,6 +60,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val navController = rememberNavController()
+            val currentBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = currentBackStackEntry?.destination?.route
             val preferences = remember { Preferences(context) }
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val scope = rememberCoroutineScope()
@@ -86,12 +90,16 @@ class MainActivity : ComponentActivity() {
                             bottomBar = { BottomNavigationBar(navController) },
 
                             floatingActionButton = {
-                                FloatingActionButton(
-                                    onClick = {},
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                                if (currentRoute != "child-form") {
+                                    FloatingActionButton(
+                                        onClick = {
+                                            navController.navigate("child-form")
+                                        },
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                                    }
                                 }
                             }
 
@@ -218,7 +226,6 @@ class MainActivity : ComponentActivity() {
                                             scope.launch {
                                                 preferences.setNotificationsEnabled(!isNotificationsEnabled)
                                             }
-                                            Log.d("VSF", "$isNotificationsEnabled")
                                             if (isNotificationsEnabled){
                                                 eventos.forEach { evento ->
                                                     agendarNotificacaoEvento(context, evento)
@@ -238,6 +245,10 @@ class MainActivity : ComponentActivity() {
 
                                 composable("profile") {
                                     ProfileScreen()
+                                }
+
+                                composable("child-form") {
+                                    ChildForm(navController, {})
                                 }
                                 //composable("events") { SubscribedEventsScreen(navController) }
                                 //composable("favorites") { FavoritesScreen(navController) }
