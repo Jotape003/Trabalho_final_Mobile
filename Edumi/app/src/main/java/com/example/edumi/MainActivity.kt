@@ -52,12 +52,13 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.edumi.models.eventos
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
 import com.example.edumi.ui.theme.PrimaryColorPairs
+import com.example.edumi.viewmodel.EventoViewModel
 import java.time.LocalDateTime
 
 
@@ -90,6 +91,8 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
+            val eventoViewModel: EventoViewModel = viewModel()
+            val eventos = eventoViewModel.eventos
             val context = LocalContext.current
             val navController = rememberNavController()
             val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -268,20 +271,33 @@ class MainActivity : ComponentActivity() {
 
                                                 if (novoEstado) {
                                                     eventos
+                                                        .map { it.second }
                                                         .filter {
-                                                            LocalDateTime.of(it.data, it.horaInicio).isAfter(LocalDateTime.now())
+                                                            try {
+                                                                val formatterData = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                                                val formatterHora = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+
+                                                                val data = java.time.LocalDate.parse(it.data, formatterData)
+                                                                val horaInicio = java.time.LocalTime.parse(it.horaInicio, formatterHora)
+                                                                val dateTime = java.time.LocalDateTime.of(data, horaInicio)
+                                                                dateTime.isAfter(java.time.LocalDateTime.now())
+                                                            } catch (e: Exception) {
+                                                                false
+                                                            }
                                                         }
                                                         .forEach { evento ->
                                                             agendarNotificacaoEvento(context, evento)
                                                         }
                                                 } else {
-                                                    eventos.forEach { evento ->
-                                                        cancelarNotificacaoEvento(context, evento)
-                                                    }
+                                                    eventos
+                                                        .map { it.second }
+                                                        .forEach { evento ->
+                                                            cancelarNotificacaoEvento(context, evento)
+                                                        }
                                                 }
+
                                             }
-                                        }
-                                        ,
+                                        },
                                         onPrimaryColorSelected = { newColorPair ->
                                             scope.launch {
                                                 preferences.setPrimaryColorName(newColorPair.name)

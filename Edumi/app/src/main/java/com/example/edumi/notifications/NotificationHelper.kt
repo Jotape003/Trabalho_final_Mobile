@@ -10,13 +10,17 @@ import java.time.ZoneId
 import android.os.Build
 import android.provider.Settings
 import android.net.Uri
+import java.time.LocalDate
+import java.time.LocalTime
 
 fun agendarNotificacaoEvento(context: Context, evento: Evento) {
-    val zonedDateTime = LocalDateTime.of(
-        evento.data,
-        evento.horaInicio.minusMinutes(1)
-    ).atZone(ZoneId.systemDefault())
+    val localDate = LocalDate.parse(evento.data)
+    val localTime = LocalTime.parse(evento.horaInicio)
 
+    val zonedDateTime = LocalDateTime.of(
+        localDate,
+        localTime.minusMinutes(1)
+    ).atZone(ZoneId.systemDefault())
 
     val triggerTimeMillis = zonedDateTime.toInstant().toEpochMilli()
 
@@ -33,8 +37,9 @@ fun agendarNotificacaoEvento(context: Context, evento: Evento) {
     )
 
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if ((context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()) {
+        if (alarmManager.canScheduleExactAlarms()) {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 triggerTimeMillis,
@@ -55,6 +60,7 @@ fun agendarNotificacaoEvento(context: Context, evento: Evento) {
         )
     }
 }
+
 
 fun cancelarNotificacaoEvento(context: Context, evento: Evento) {
     val intent = Intent(context, NotificationReceiver::class.java)

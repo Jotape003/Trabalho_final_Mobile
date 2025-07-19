@@ -22,11 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.pager.*
-import com.example.edumi.models.eventos
 import com.example.edumi.models.resp
-import com.google.accompanist.pager.ExperimentalPagerApi
+import com.example.edumi.viewmodel.EventoViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.YearMonth
@@ -36,16 +36,26 @@ import java.util.Locale
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
 @Composable
-fun AllChildrenEvents(navController: NavController, context: Context) {
+fun AllChildrenEvents(
+    navController: NavController,
+    context: Context,
+    viewModel: EventoViewModel = viewModel()
+) {
+    val eventos = viewModel.eventos
     val todosOsFilhos = remember { resp.filhos }
-    val todosOsEventosDosFilhos = remember {
-        eventos.filter { evento ->
-            todosOsFilhos.any { filho -> filho.id == evento.idFilho }
-        }
+
+    val todosOsEventosDosFilhos = remember(eventos) {
+        eventos.map { it.second }
+            .filter { evento ->
+                todosOsFilhos.any { filho -> filho.id == evento.idFilho }
+            }
     }
 
     val today = remember { LocalDate.now() }
     var selectedDate by remember { mutableStateOf(today) }
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val selectedDateStr = selectedDate.format(formatter)
 
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
@@ -147,7 +157,8 @@ fun AllChildrenEvents(navController: NavController, context: Context) {
                         ) {
                             items(days) { (date, isCurrentMonth) ->
                                 val isSelected = date == selectedDate
-                                val hasEvent = todosOsEventosDosFilhos.any { it.data == date }
+                                val dateStr = date.format(formatter)
+                                val hasEvent = todosOsEventosDosFilhos.any { it.data == dateStr }
 
                                 Box(
                                     modifier = Modifier
@@ -185,9 +196,13 @@ fun AllChildrenEvents(navController: NavController, context: Context) {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        val eventosDoDia = todosOsEventosDosFilhos.filter { it.data == selectedDate }
+                        val eventosDoDia = todosOsEventosDosFilhos.filter { it.data == selectedDateStr }
 
-                        Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
                             Text(
                                 text = "Eventos em ${selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
                                 style = MaterialTheme.typography.titleMedium

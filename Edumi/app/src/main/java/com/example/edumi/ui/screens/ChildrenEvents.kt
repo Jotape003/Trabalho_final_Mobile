@@ -18,9 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.eventos
+import com.example.edumi.viewmodel.EventoViewModel
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -31,9 +32,10 @@ import java.util.Locale
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
 @Composable
-fun ChildrenEvents(navController: NavController, context: Context, filho: Filho) {
+fun ChildrenEvents(navController: NavController, context: Context, filho: Filho, viewModel: EventoViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(true) }
-    val eventosFilho = remember { eventos.filter { it.idFilho == filho.id } }
+    var eventos = viewModel.eventos
+    val eventosFilho = eventos.filter { (_, evento) -> evento.idFilho == filho.id }
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
@@ -136,7 +138,10 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
                         ) {
                             items(days) { (date, isFromOtherMonth) ->
                                 val isSelected = date == selectedDate
-                                val hasEvent = eventosFilho.any { it.data == date }
+                                val hasEvent = eventosFilho.any { (_, evento) ->
+                                    LocalDate.parse(evento.data) == date
+                                }
+
 
                                 Box(
                                     modifier = Modifier
@@ -174,7 +179,9 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        val eventosDoDia = eventosFilho.filter { it.data == selectedDate }
+                        val eventosDoDia = eventosFilho.filter { (_, evento) ->
+                            LocalDate.parse(evento.data) == selectedDate
+                        }
 
                         Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
                             Text(
@@ -188,7 +195,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 LazyColumn {
                                     items(eventosDoDia.size) { index ->
-                                        val evento = eventosDoDia[index]
+                                        val (_, evento) = eventosDoDia[index]
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
