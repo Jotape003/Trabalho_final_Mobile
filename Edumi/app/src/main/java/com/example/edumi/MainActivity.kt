@@ -1,7 +1,12 @@
 package com.example.edumi
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -18,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -46,16 +50,44 @@ import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.edumi.models.eventos
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
+import com.example.edumi.ui.theme.PrimaryColorPairs
+import java.time.LocalDateTime
 
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                100
+            )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Eventos"
+            val descriptionText = "Um evento está próximo, cheque seu calendário!"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("EVENTOS_CHANNEL", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
@@ -67,8 +99,14 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val isDarkTheme by preferences.isDarkMode.collectAsState(initial = false)
             val isNotificationsEnabled by preferences.isNotificationsEnabled.collectAsState(initial = false)
+            val primaryColorName by preferences.primaryColorName.collectAsState(initial = "Azul")
 
-            EdumiTheme(darkTheme = isDarkTheme) {
+            val primaryColorPair = PrimaryColorPairs.find { it.name == primaryColorName } ?: PrimaryColorPairs[0]
+
+            EdumiTheme(
+                darkTheme = isDarkTheme,
+                primaryColorPair = primaryColorPair
+            ) {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     gesturesEnabled = true,
@@ -217,6 +255,7 @@ class MainActivity : ComponentActivity() {
                                     SettingsScreen(
                                         isDarkTheme = isDarkTheme,
                                         isNotificationsEnabled = isNotificationsEnabled,
+                                        primaryColorPair = primaryColorPair,
                                         onThemeToggle = {
                                             scope.launch {
                                                 preferences.setDarkMode(!isDarkTheme)
@@ -224,16 +263,28 @@ class MainActivity : ComponentActivity() {
                                         },
                                         onNotificationsToggle = {
                                             scope.launch {
-                                                preferences.setNotificationsEnabled(!isNotificationsEnabled)
+                                                val novoEstado = !isNotificationsEnabled
+                                                preferences.setNotificationsEnabled(novoEstado)
+
+                                                if (novoEstado) {
+                                                    eventos
+                                                        .filter {
+                                                            LocalDateTime.of(it.data, it.horaInicio).isAfter(LocalDateTime.now())
+                                                        }
+                                                        .forEach { evento ->
+                                                            agendarNotificacaoEvento(context, evento)
+                                                        }
+                                                } else {
+                                                    eventos.forEach { evento ->
+                                                        cancelarNotificacaoEvento(context, evento)
+                                                    }
+                                                }
                                             }
-                                            if (isNotificationsEnabled){
-                                                eventos.forEach { evento ->
-                                                    agendarNotificacaoEvento(context, evento)
-                                                }
-                                            } else {
-                                                eventos.forEach { evento ->
-                                                    cancelarNotificacaoEvento(context, evento)
-                                                }
+                                        }
+                                        ,
+                                        onPrimaryColorSelected = { newColorPair ->
+                                            scope.launch {
+                                                preferences.setPrimaryColorName(newColorPair.name)
                                             }
                                         }
                                     )
@@ -250,12 +301,6 @@ class MainActivity : ComponentActivity() {
                                 composable("child-form") {
                                     ChildForm(navController, {})
                                 }
-                                //composable("events") { SubscribedEventsScreen(navController) }
-                                //composable("favorites") { FavoritesScreen(navController) }
-                                //composable("eventDetails/{eventId}") { backStackEntry ->
-                                //   val eventId = backStackEntry.arguments?.getString("eventId")
-                                // EventDetailsScreen(eventId = eventId)
-                                //}
                             }
                         }
                     })
