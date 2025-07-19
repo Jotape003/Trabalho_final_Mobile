@@ -15,26 +15,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.frequencias
+import com.example.edumi.viewmodel.FrequenciaViewModel
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.delay
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
 @Composable
-fun ChildrenFrequency(navController: NavController, context: Context, filho: Filho) {
+fun ChildrenFrequency(
+    navController: NavController,
+    context: Context,
+    filho: Filho,
+    viewModel: FrequenciaViewModel = viewModel()
+) {
+    var frequencias = viewModel.frequencias
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
         delay(2000)
         isLoading = false
     }
 
-    val frequenciasFilho = remember { frequencias.filter { it.idFilho == filho.id } }
+    val frequenciasFilho = frequencias.filter { it.idFilho == filho.id }
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
 
@@ -61,7 +71,6 @@ fun ChildrenFrequency(navController: NavController, context: Context, filho: Fil
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Título principal
                 Text(
                     text = "Frequência de ${filho.name}",
                     style = MaterialTheme.typography.titleLarge,
@@ -100,7 +109,10 @@ fun ChildrenFrequency(navController: NavController, context: Context, filho: Fil
                         previousMonthDays + currentMonthDays + nextMonthDays
                     }
 
-                    val frequenciasDoMes = frequenciasFilho.filter { YearMonth.from(it.data) == currentMonth }
+                    val frequenciasDoMes = frequenciasFilho.filter {
+                        val localDate = LocalDate.parse(it.data, formatter)
+                        YearMonth.from(localDate) == currentMonth
+                    }
                     val totalPresencas = frequenciasDoMes.count { it.presente }
                     val totalFaltas = frequenciasDoMes.count { !it.presente }
                     val totalAulasRegistradas = frequenciasDoMes.size
@@ -143,7 +155,9 @@ fun ChildrenFrequency(navController: NavController, context: Context, filho: Fil
                             modifier = Modifier.height(260.dp)
                         ) {
                             items(days) { (date, isFromOtherMonth) ->
-                                val freqDoDia = frequenciasFilho.find { it.data == date }
+                                val freqDoDia = frequenciasFilho.find {
+                                    LocalDate.parse(it.data, formatter) == date
+                                }
 
                                 val dayColor = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = if (isFromOtherMonth) 0.3f else 1f
