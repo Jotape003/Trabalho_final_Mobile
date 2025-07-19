@@ -18,15 +18,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.tasks
+import com.example.edumi.viewmodel.TarefaViewModel
 import kotlinx.coroutines.delay
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ChildrenTask(navController: NavHostController, context: Context, filho: Filho) {
+fun ChildrenTask(
+    navController: NavHostController,
+    context: Context,
+    filho: Filho,
+    viewModel: TarefaViewModel = viewModel()
+) {
+    val tasks = viewModel.tarefas
     val tasksDoFilho = tasks.filter { it.idFilho == filho.id }
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
