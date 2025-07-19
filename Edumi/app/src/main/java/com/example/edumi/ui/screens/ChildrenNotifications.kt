@@ -29,7 +29,6 @@ fun ChildrenNotifications(navController: NavHostController, context: Context, fi
         isLoading = false
     }
 
-    // Filtrar comunicados apenas do filho atual
     val comunicadosDoFilho = comunicados.filter { it.idFilho == filho.id }
     AnimatedContent(
         targetState = isLoading,

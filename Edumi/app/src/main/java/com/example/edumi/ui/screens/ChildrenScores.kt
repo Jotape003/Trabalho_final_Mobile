@@ -19,15 +19,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.notas
+import com.example.edumi.viewmodel.NotaViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ChildrenScores(navController: NavController, context: Context, filho: Filho) {
+fun ChildrenScores(
+    navController: NavController,
+    context: Context, filho: Filho,
+    viewModel: NotaViewModel = viewModel()
+) {
     var isLoading by remember { mutableStateOf(true) }
+    val notas = viewModel.notas
+    val notasFiltradas = notas.filter { it.idFilho == filho.id }
 
     LaunchedEffect(Unit) {
         delay(2000) // Simula um carregamento
@@ -96,7 +103,7 @@ fun ChildrenScores(navController: NavController, context: Context, filho: Filho)
                     )
                 }
 
-                notas.forEachIndexed { index, nota ->
+                notasFiltradas.forEachIndexed { index, nota ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
