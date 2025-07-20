@@ -13,8 +13,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import com.example.edumi.ui.theme.LightBlue
-
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {

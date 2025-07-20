@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,18 @@ class EscolaViewModel : ViewModel() {
             _escolas.value = lista
         }
     }
+
+    fun getNomeEscolaPorId(id: String, onResult: (String) -> Unit) {
+        colecao.document(id).get()
+            .addOnSuccessListener { doc ->
+                val escola = doc.toObject(Escola::class.java)
+                onResult(escola?.nome ?: "Escola desconhecida")
+            }
+            .addOnFailureListener {
+                onResult("Erro ao buscar escola")
+            }
+    }
+
 
     override fun onCleared() {
         super.onCleared()

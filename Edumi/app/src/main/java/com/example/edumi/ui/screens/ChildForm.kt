@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.edumi.R
 import com.example.edumi.models.Filho
 import com.example.edumi.models.Escola
+import com.example.edumi.models.Turma
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,15 +53,13 @@ fun ChildForm(
     var idade by remember { mutableStateOf("") }
     var fotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Escola autocomplete
     val escolas by escolaViewModel.escolas.observeAsState(emptyList())
     var escolaSelecionada by remember { mutableStateOf<Escola?>(null) }
     var escolaInput by remember { mutableStateOf("") }
     var escolaExpanded by remember { mutableStateOf(false) }
 
-    // Turma autocomplete
     val turmas by turmaViewModel.turmas.observeAsState(emptyList())
-    var turmaSelecionada by remember { mutableStateOf<String?>(null) }
+    var turmaSelecionada by remember { mutableStateOf<Turma?>(null) }
     var turmaInput by remember { mutableStateOf("") }
     var turmaExpanded by remember { mutableStateOf(false) }
 
@@ -161,7 +160,6 @@ fun ChildForm(
             shape = RoundedCornerShape(12.dp)
         )
 
-        // Autocomplete Escola
         ExposedDropdownMenuBox(
             expanded = escolaExpanded,
             onExpandedChange = { escolaExpanded = !escolaExpanded }
@@ -204,7 +202,6 @@ fun ChildForm(
             }
         }
 
-        // Autocomplete Turma (aparece só se escola selecionada)
         if (escolaSelecionada != null) {
             ExposedDropdownMenuBox(
                 expanded = turmaExpanded,
@@ -239,7 +236,7 @@ fun ChildForm(
                             DropdownMenuItem(
                                 text = { Text(turma.nome) },
                                 onClick = {
-                                    turmaSelecionada = turma.nome
+                                    turmaSelecionada = turma
                                     turmaInput = turma.nome
                                     turmaExpanded = false
                                 }
@@ -263,7 +260,7 @@ fun ChildForm(
                         name = nome,
                         idade = idade.toInt(),
                         idEscola = escolaSelecionada!!.id,
-                        turma = turmaSelecionada!!,
+                        idTurma = turmaSelecionada!!.id,
                         foto = if (fotoUri == null) R.drawable.ic_default_avatar else 0,
                         idResponsavel = "99"
                     )

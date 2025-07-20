@@ -37,7 +37,7 @@ fun ChildrenScores(
     val notasFiltradas = notas.filter { it.idFilho == filho.id }
 
     LaunchedEffect(Unit) {
-        delay(2000) // Simula um carregamento
+        delay(2000)
         isLoading = false
     }
 

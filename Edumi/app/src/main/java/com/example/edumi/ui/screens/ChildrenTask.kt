@@ -37,7 +37,7 @@ fun ChildrenTask(
     val tasksDoFilho = tasks.filter { it.idFilho == filho.id }
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+        delay(2000)
         isLoading = false
     }
 

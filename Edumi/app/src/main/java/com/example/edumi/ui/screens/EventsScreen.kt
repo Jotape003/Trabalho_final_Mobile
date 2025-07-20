@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.edumi.models.Filho
 import com.google.accompanist.pager.*
 import com.example.edumi.models.resp
 import com.example.edumi.viewmodel.EventoViewModel
@@ -39,10 +40,11 @@ import java.util.Locale
 fun AllChildrenEvents(
     navController: NavController,
     context: Context,
-    viewModel: EventoViewModel = viewModel()
+    viewModel: EventoViewModel = viewModel(),
+    filhos: List<Filho>
 ) {
     val eventos = viewModel.eventos
-    val todosOsFilhos = remember { resp.filhos }
+    val todosOsFilhos = remember { filhos }
 
     val todosOsEventosDosFilhos = remember(eventos) {
         eventos.map { it.second }
@@ -68,7 +70,7 @@ fun AllChildrenEvents(
 
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+        delay(2000)
         isLoading = false
     }
 

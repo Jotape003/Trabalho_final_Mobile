@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.edumi.models.Filho
 import com.example.edumi.models.resp
 import com.example.edumi.viewmodel.ComunicadoViewModel
 import kotlinx.coroutines.delay
@@ -43,14 +44,15 @@ import kotlinx.coroutines.delay
 fun AllNotifications(
     navController: NavHostController,
     context: Context,
+    filhos: List<Filho>,
     viewModel: ComunicadoViewModel = viewModel()
 ) {
     val allComunicados = remember { viewModel.comunicados }
-    val allFilhos = remember { resp.filhos }
+    val allFilhos = remember { filhos }
 
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+        delay(2000)
         isLoading = false
     }
 

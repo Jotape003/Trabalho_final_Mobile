@@ -27,6 +27,22 @@ class TurmaViewModel : ViewModel() {
             }
     }
 
+    fun getNomeTurmaPorId(id: String, callback: (String) -> Unit) {
+        colecao.document(id).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val turma = document.toObject(Turma::class.java)
+                    callback(turma?.nome ?: "Turma desconhecida")
+                } else {
+                    callback("Turma desconhecida")
+                }
+            }
+            .addOnFailureListener {
+                callback("Turma desconhecida")
+            }
+    }
+
+
     fun pararDeOuvirTurmas() {
         listener?.remove()
         listener = null

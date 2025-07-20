@@ -54,8 +54,10 @@ class FilhoViewModel : ViewModel() {
             }
     }
 
-    fun ouvirListaFilhos() {
+    fun ouvirFilhosDoResponsavel(idResponsavel: String) {
+        listenerRegistration?.remove()
         listenerRegistration = db.collection("filhos")
+            .whereEqualTo("idResponsavel", idResponsavel)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
                     _listaFilhos.value = emptyList()

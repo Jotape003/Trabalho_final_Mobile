@@ -44,8 +44,8 @@ val PrimaryColorPairs = listOf(
         name = "Laranja"
     ),
     PrimaryColorPair(
-        light = Color(0xFF4DD0E1), // Ciano claro
-        dark = Color(0xFF00796B),  // Ciano escuro
+        light = Color(0xFF4DD0E1),
+        dark = Color(0xFF00796B),
         name = "Ciano"
     )
 

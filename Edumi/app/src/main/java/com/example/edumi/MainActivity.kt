@@ -1,5 +1,6 @@
 package com.example.edumi
 
+import FilhoViewModel
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -22,6 +23,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,6 +52,7 @@ import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,7 +62,6 @@ import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
 import com.example.edumi.ui.theme.PrimaryColorPairs
 import com.example.edumi.viewmodel.EventoViewModel
-import java.time.LocalDateTime
 
 
 @ExperimentalMaterial3Api
@@ -91,6 +93,13 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
+            val filhoViewModel: FilhoViewModel = viewModel()
+            val listaFilhos by filhoViewModel.listaFilhos.observeAsState(emptyList())
+
+            LaunchedEffect(resp.id) {
+                filhoViewModel.ouvirFilhosDoResponsavel(resp.id)
+            }
+
             val eventoViewModel: EventoViewModel = viewModel()
             val eventos = eventoViewModel.eventos
             val context = LocalContext.current
@@ -154,24 +163,27 @@ class MainActivity : ComponentActivity() {
                                 composable("home") {
                                     HomeScreen(
                                         navController,
-                                        context = context
+                                        context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
                                 composable("events") {
                                     AllChildrenEvents(
                                         navController = navController,
                                         context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
                                 composable("notice"){
                                     AllNotifications(
                                         navController = navController,
                                         context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
                                 composable("ChildrenDetails/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenDetails(
@@ -184,7 +196,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenScores/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenScores(
@@ -198,7 +210,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenNotifications/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenNotifications(
@@ -212,7 +224,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenEvents/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenEvents(
@@ -226,7 +238,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenFrequency/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenFrequency(
@@ -241,7 +253,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenTask/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenTask(
