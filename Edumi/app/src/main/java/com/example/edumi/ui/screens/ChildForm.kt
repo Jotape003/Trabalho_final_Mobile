@@ -1,5 +1,7 @@
 package com.example.edumi.ui.screens
 
+import EscolaViewModel
+import FilhoViewModel
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -19,6 +21,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,23 +31,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.R
 import com.example.edumi.models.Filho
+import com.example.edumi.models.Escola
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChildForm(
     navController: NavController,
-    onChildAdded: (Filho) -> Unit
+    filhoViewModel: FilhoViewModel = viewModel(),
+    escolaViewModel: EscolaViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
     var nome by remember { mutableStateOf("") }
     var idade by remember { mutableStateOf("") }
-    var escola by remember { mutableStateOf("") }
     var turma by remember { mutableStateOf("") }
-
     var fotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(contract = GetContent()) { uri: Uri? ->
@@ -52,6 +56,16 @@ fun ChildForm(
             fotoUri = uri
         }
     }
+
+    val escolas by escolaViewModel.escolas.observeAsState(emptyList())
+    var escolaSelecionada by remember { mutableStateOf<Escola?>(null) }
+    var escolaInput by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        escolaViewModel.ouvirEscolas()
+    }
+
 
     Column(
         modifier = Modifier
@@ -63,8 +77,7 @@ fun ChildForm(
         Text(
             text = "Adicionar vínculo",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
+            modifier = Modifier.padding(horizontal = 24.dp)
         )
 
         val bitmap = remember(fotoUri) {
@@ -129,15 +142,47 @@ fun ChildForm(
             shape = RoundedCornerShape(12.dp)
         )
 
-        OutlinedTextField(
-            value = escola,
-            onValueChange = { escola = it },
-            label = { Text("Escola") },
-            leadingIcon = { Icon(Icons.Default.School, contentDescription = "Escola") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp)
-        )
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = escolaInput,
+                onValueChange = {
+                    escolaInput = it
+                    expanded = true
+                },
+                label = { Text("Escola") },
+                leadingIcon = { Icon(Icons.Default.School, contentDescription = "Escola") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                escolas
+                    .filter { it.nome.contains(escolaInput, ignoreCase = true) }
+                    .forEach { escola ->
+                        DropdownMenuItem(
+                            text = { Text(escola.nome) },
+                            onClick = {
+                                escolaSelecionada = escola
+                                escolaInput = escola.nome
+                                expanded = false
+                            }
+                        )
+                    }
+            }
+        }
 
         OutlinedTextField(
             value = turma,
@@ -153,17 +198,22 @@ fun ChildForm(
 
         Button(
             onClick = {
-                if (nome.isNotBlank() && idade.isNotBlank() && escola.isNotBlank() && turma.isNotBlank()) {
+                if (
+                    nome.isNotBlank() &&
+                    idade.isNotBlank() &&
+                    escolaSelecionada != null &&
+                    turma.isNotBlank()
+                ) {
                     val novoFilho = Filho(
-                        id = (0..9999).random(),
                         name = nome,
                         idade = idade.toInt(),
-                        escola = escola,
+                        idEscola = escolaSelecionada!!.id,
                         turma = turma,
-                        foto = if (fotoUri == null) R.drawable.ic_default_avatar else 0
+                        foto = if (fotoUri == null) R.drawable.ic_default_avatar else 0,
+                        idResponsavel = "99"
                     )
-                    onChildAdded(novoFilho)
-                    navController.popBackStack()
+                    filhoViewModel.salvarFilho(novoFilho)
+                    navController.navigate("home")
                 }
             },
             modifier = Modifier

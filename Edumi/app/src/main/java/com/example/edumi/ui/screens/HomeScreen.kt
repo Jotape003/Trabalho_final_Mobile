@@ -97,7 +97,7 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = filho.escola,
+                                        text = filho.idEscola,
                                         style = MaterialTheme.typography.bodyMedium,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis

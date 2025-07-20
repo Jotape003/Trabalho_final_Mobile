@@ -19,18 +19,18 @@ val resp = Responsavel(
     name = "Pedro Joao",
     filhos = listOf(
         Filho(
-            id = 1,
+            id = "1",
             name = "Roberto Facundo",
             idade = 10,
-            escola = "Universidade Federal do Ceará",
+            idEscola = "Universidade Federal do Ceará",
             foto = R.drawable.robertofacundo,
             turma = "5º Ano - Turma A"
         ),
         Filho(
-            id = 2,
+            id = "2",
             name = "Ana Januária",
             idade = 12,
-            escola = "Seminário Batista do Cariri",
+            idEscola = "Seminário Batista do Cariri",
             foto = R.drawable.anajanuaria,
             turma = "7° Ano - Turma A"
         )

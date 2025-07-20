@@ -315,7 +315,7 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 composable("child-form") {
-                                    ChildForm(navController, {})
+                                    ChildForm(navController)
                                 }
                             }
                         }

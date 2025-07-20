@@ -31,7 +31,7 @@ fun agendarNotificacaoEvento(context: Context, evento: Evento) {
 
     val pendingIntent = PendingIntent.getBroadcast(
         context,
-        evento.idFilho,
+        evento.idFilho.hashCode(),
         intent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
@@ -66,7 +66,7 @@ fun cancelarNotificacaoEvento(context: Context, evento: Evento) {
     val intent = Intent(context, NotificationReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(
         context,
-        evento.idFilho,
+        evento.idFilho.hashCode(),
         intent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
     )

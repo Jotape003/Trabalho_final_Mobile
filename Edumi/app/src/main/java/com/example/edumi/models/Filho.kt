@@ -1,11 +1,11 @@
 package com.example.edumi.models
 
 data class Filho(
-    val id : Int,
-    val name: String,
-    val idade: Int,
-    val escola: String,
-    val foto: Int,
-    val turma: String
+    val id: String = "",
+    val name: String = "",
+    val idade: Int = 0,
+    val idEscola: String = "",
+    val foto: Int = 0,
+    val turma: String = "",
+    val idResponsavel: String = ""
 )
-
