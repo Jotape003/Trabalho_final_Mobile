@@ -2,6 +2,7 @@ package com.example.edumi.ui.screens
 
 import EscolaViewModel
 import FilhoViewModel
+import TurmaViewModel
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -42,14 +43,26 @@ import com.example.edumi.models.Escola
 fun ChildForm(
     navController: NavController,
     filhoViewModel: FilhoViewModel = viewModel(),
-    escolaViewModel: EscolaViewModel = viewModel()
+    escolaViewModel: EscolaViewModel = viewModel(),
+    turmaViewModel: TurmaViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
     var nome by remember { mutableStateOf("") }
     var idade by remember { mutableStateOf("") }
-    var turma by remember { mutableStateOf("") }
     var fotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Escola autocomplete
+    val escolas by escolaViewModel.escolas.observeAsState(emptyList())
+    var escolaSelecionada by remember { mutableStateOf<Escola?>(null) }
+    var escolaInput by remember { mutableStateOf("") }
+    var escolaExpanded by remember { mutableStateOf(false) }
+
+    // Turma autocomplete
+    val turmas by turmaViewModel.turmas.observeAsState(emptyList())
+    var turmaSelecionada by remember { mutableStateOf<String?>(null) }
+    var turmaInput by remember { mutableStateOf("") }
+    var turmaExpanded by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(contract = GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -57,15 +70,21 @@ fun ChildForm(
         }
     }
 
-    val escolas by escolaViewModel.escolas.observeAsState(emptyList())
-    var escolaSelecionada by remember { mutableStateOf<Escola?>(null) }
-    var escolaInput by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         escolaViewModel.ouvirEscolas()
     }
 
+    LaunchedEffect(escolaSelecionada?.id) {
+        escolaSelecionada?.id?.let { idEscola ->
+            turmaViewModel.ouvirTurmasPorEscola(idEscola)
+            turmaSelecionada = null
+            turmaInput = ""
+        } ?: run {
+            turmaViewModel.pararDeOuvirTurmas()
+            turmaSelecionada = null
+            turmaInput = ""
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -142,15 +161,16 @@ fun ChildForm(
             shape = RoundedCornerShape(12.dp)
         )
 
+        // Autocomplete Escola
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            expanded = escolaExpanded,
+            onExpandedChange = { escolaExpanded = !escolaExpanded }
         ) {
             OutlinedTextField(
                 value = escolaInput,
                 onValueChange = {
                     escolaInput = it
-                    expanded = true
+                    escolaExpanded = true
                 },
                 label = { Text("Escola") },
                 leadingIcon = { Icon(Icons.Default.School, contentDescription = "Escola") },
@@ -160,14 +180,14 @@ fun ChildForm(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = escolaExpanded)
                 },
                 colors = ExposedDropdownMenuDefaults.textFieldColors()
             )
 
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = escolaExpanded,
+                onDismissRequest = { escolaExpanded = false }
             ) {
                 escolas
                     .filter { it.nome.contains(escolaInput, ignoreCase = true) }
@@ -177,22 +197,57 @@ fun ChildForm(
                             onClick = {
                                 escolaSelecionada = escola
                                 escolaInput = escola.nome
-                                expanded = false
+                                escolaExpanded = false
                             }
                         )
                     }
             }
         }
 
-        OutlinedTextField(
-            value = turma,
-            onValueChange = { turma = it },
-            label = { Text("Turma") },
-            leadingIcon = { Icon(Icons.Default.Group, contentDescription = "Turma") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp)
-        )
+        // Autocomplete Turma (aparece só se escola selecionada)
+        if (escolaSelecionada != null) {
+            ExposedDropdownMenuBox(
+                expanded = turmaExpanded,
+                onExpandedChange = { turmaExpanded = !turmaExpanded }
+            ) {
+                OutlinedTextField(
+                    value = turmaInput,
+                    onValueChange = {
+                        turmaInput = it
+                        turmaExpanded = true
+                    },
+                    label = { Text("Turma") },
+                    leadingIcon = { Icon(Icons.Default.Group, contentDescription = "Turma") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = turmaExpanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = turmaExpanded,
+                    onDismissRequest = { turmaExpanded = false }
+                ) {
+                    turmas
+                        .filter { it.nome.contains(turmaInput, ignoreCase = true) }
+                        .forEach { turma ->
+                            DropdownMenuItem(
+                                text = { Text(turma.nome) },
+                                onClick = {
+                                    turmaSelecionada = turma.nome
+                                    turmaInput = turma.nome
+                                    turmaExpanded = false
+                                }
+                            )
+                        }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -202,13 +257,13 @@ fun ChildForm(
                     nome.isNotBlank() &&
                     idade.isNotBlank() &&
                     escolaSelecionada != null &&
-                    turma.isNotBlank()
+                    turmaSelecionada != null
                 ) {
                     val novoFilho = Filho(
                         name = nome,
                         idade = idade.toInt(),
                         idEscola = escolaSelecionada!!.id,
-                        turma = turma,
+                        turma = turmaSelecionada!!,
                         foto = if (fotoUri == null) R.drawable.ic_default_avatar else 0,
                         idResponsavel = "99"
                     )
