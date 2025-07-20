@@ -12,7 +12,12 @@
           "package_name": "com.example.edumi"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "198233508551-n0k72g7c0p7cp7lpmou7hkm1l7cqnltv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCdbMreKMc9ax9xKFgWLinRbwh81rdCO2w"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198233508551-n0k72g7c0p7cp7lpmou7hkm1l7cqnltv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

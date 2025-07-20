@@ -55,12 +55,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.edumi.data.AuthRepository
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
+import com.example.edumi.ui.screens.ForgotPasswordScreen
+import com.example.edumi.ui.screens.LoginScreen
 import com.example.edumi.ui.theme.PrimaryColorPairs
+import com.example.edumi.ui.view.RegisterScreen
+import com.example.edumi.viewmodel.AuthViewModel
+import com.example.edumi.viewmodel.AuthViewModelFactory
 import com.example.edumi.viewmodel.EventoViewModel
 
 
@@ -113,8 +120,38 @@ class MainActivity : ComponentActivity() {
             val isNotificationsEnabled by preferences.isNotificationsEnabled.collectAsState(initial = false)
             val primaryColorName by preferences.primaryColorName.collectAsState(initial = "Azul")
 
-            val primaryColorPair = PrimaryColorPairs.find { it.name == primaryColorName } ?: PrimaryColorPairs[0]
+            val primaryColorPair =
+                PrimaryColorPairs.find { it.name == primaryColorName } ?: PrimaryColorPairs[0]
 
+            val repository = AuthRepository()
+            val authViewModel = ViewModelProvider(this, AuthViewModelFactory(repository)).get(
+                AuthViewModel::class.java
+            )
+            val isLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
+
+            LaunchedEffect(isLoggedIn) {
+                if (isLoggedIn) {
+                    // Se o usuário estiver logado, navegue para a tela 'home'
+                    // e limpe o back stack para que ele não possa voltar para login
+                    navController.navigate("home") {
+                        popUpTo("login") {
+                            inclusive = true // Inclui "login" na limpeza
+                        }
+                    }
+                } else {
+                    // Se o usuário não estiver logado, certifique-se de que ele esteja na tela de login
+                    // A menos que já esteja em registro/esqueci a senha
+                    drawerState.close()
+                    if (currentRoute != "register" && currentRoute != "forgotPassword" && currentRoute != "login") {
+                        navController.navigate("login") {
+                            // Limpa o back stack ao sair do app logado e voltar para a tela de login
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            }
             EdumiTheme(
                 darkTheme = isDarkTheme,
                 primaryColorPair = primaryColorPair
@@ -123,24 +160,26 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController, drawerState, scope)
+                        DrawerContent(navController, drawerState, scope, authViewModel)
                     },
                     content = {
                         Scaffold(
                             topBar = {
-                                TopBar(
-                                    onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onSearchClick = {
-                                        // TEM QUE CONFIGURAR BEM AQUI
-                                    },
-                                    navController = navController
-                                )
+                                if (isLoggedIn) {
+                                    TopBar(
+                                        onOpenDrawer = { scope.launch { drawerState.open() } },
+                                        onSearchClick = { /* seu código */ },
+                                        navController = navController
+                                    )
+                                }
                             },
-
-                            bottomBar = { BottomNavigationBar(navController) },
-
+                            bottomBar = {
+                                if (isLoggedIn) {
+                                    BottomNavigationBar(navController)
+                                }
+                            },
                             floatingActionButton = {
-                                if (currentRoute != "child-form") {
+                                if (isLoggedIn && currentRoute != "child-form") {
                                     FloatingActionButton(
                                         onClick = {
                                             navController.navigate("child-form")
@@ -152,14 +191,28 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
-
                         ) { innerPadding ->
                             NavHost(
                                 navController = navController,
-                                startDestination = "home",
+                                startDestination = "login",
                                 modifier = Modifier.padding(innerPadding)
 
                             ) {
+                                composable("login") {
+                                    LoginScreen(authViewModel, navController)
+                                }
+                                composable("register") {
+                                    RegisterScreen(
+                                        authViewModel,
+                                        navController
+                                    )
+                                }
+                                composable("forgotPassword") {
+                                    ForgotPasswordScreen(
+                                        authViewModel,
+                                        navController
+                                    )
+                                }
                                 composable("home") {
                                     HomeScreen(
                                         navController,
@@ -174,7 +227,7 @@ class MainActivity : ComponentActivity() {
                                         filhos = listaFilhos
                                     )
                                 }
-                                composable("notice"){
+                                composable("notice") {
                                     AllNotifications(
                                         navController = navController,
                                         context = context,
@@ -286,25 +339,49 @@ class MainActivity : ComponentActivity() {
                                                         .map { it.second }
                                                         .filter {
                                                             try {
-                                                                val formatterData = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                                                val formatterHora = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+                                                                val formatterData =
+                                                                    java.time.format.DateTimeFormatter.ofPattern(
+                                                                        "yyyy-MM-dd"
+                                                                    )
+                                                                val formatterHora =
+                                                                    java.time.format.DateTimeFormatter.ofPattern(
+                                                                        "HH:mm"
+                                                                    )
 
-                                                                val data = java.time.LocalDate.parse(it.data, formatterData)
-                                                                val horaInicio = java.time.LocalTime.parse(it.horaInicio, formatterHora)
-                                                                val dateTime = java.time.LocalDateTime.of(data, horaInicio)
+                                                                val data =
+                                                                    java.time.LocalDate.parse(
+                                                                        it.data,
+                                                                        formatterData
+                                                                    )
+                                                                val horaInicio =
+                                                                    java.time.LocalTime.parse(
+                                                                        it.horaInicio,
+                                                                        formatterHora
+                                                                    )
+                                                                val dateTime =
+                                                                    java.time.LocalDateTime.of(
+                                                                        data,
+                                                                        horaInicio
+                                                                    )
                                                                 dateTime.isAfter(java.time.LocalDateTime.now())
                                                             } catch (e: Exception) {
                                                                 false
                                                             }
                                                         }
                                                         .forEach { evento ->
-                                                            agendarNotificacaoEvento(context, evento)
+                                                            agendarNotificacaoEvento(
+                                                                context,
+                                                                evento
+                                                            )
                                                         }
                                                 } else {
                                                     eventos
                                                         .map { it.second }
                                                         .forEach { evento ->
-                                                            cancelarNotificacaoEvento(context, evento)
+                                                            cancelarNotificacaoEvento(
+                                                                context,
+                                                                evento
+                                                            )
                                                         }
                                                 }
 

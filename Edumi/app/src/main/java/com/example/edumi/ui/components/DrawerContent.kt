@@ -35,8 +35,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.models.resp
+import com.example.edumi.viewmodel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -44,7 +46,8 @@ import kotlinx.coroutines.launch
 fun DrawerContent(
     navController: NavController,
     drawerState: DrawerState,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    viewModel: AuthViewModel
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -209,7 +212,9 @@ fun DrawerContent(
                     confirmButton = {
                         TextButton(
                             onClick = {
+                                viewModel.logout()
                                 showLogoutDialog = false
+                                navController.navigate("login")
                             }
                         ) {
                             Text("Sim")
