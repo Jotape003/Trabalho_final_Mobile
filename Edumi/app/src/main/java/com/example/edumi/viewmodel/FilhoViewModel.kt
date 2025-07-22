@@ -8,6 +8,7 @@ import com.google.firebase.firestore.ListenerRegistration
 class FilhoViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
+    private val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
 
     private val _saveStatus = MutableLiveData<Boolean>()
     val saveStatus: LiveData<Boolean> = _saveStatus
@@ -67,6 +68,30 @@ class FilhoViewModel : ViewModel() {
                 val filhos = snapshots?.documents?.mapNotNull { it.toObject(Filho::class.java) }
                 _listaFilhos.value = filhos ?: emptyList()
             }
+    }
+
+    fun atualizarFilho(filho: Filho, callback: (Boolean) -> Unit) {
+        val dadosAtualizados = mapOf(
+            "name" to filho.name,
+            "idade" to filho.idade,
+            "idEscola" to filho.idEscola,
+            "idTurma" to filho.idTurma
+        )
+
+        db.collection("filhos")
+            .document(filho.id)
+            .update(dadosAtualizados)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
+    }
+
+
+    fun deletarFilho(filhoId: String, callback: (Boolean) -> Unit) {
+        db.collection("filhos")
+            .document(filhoId)
+            .delete()
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
     }
 
     override fun onCleared() {
