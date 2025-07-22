@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.resp
 import com.example.edumi.viewmodel.ComunicadoViewModel
 import kotlinx.coroutines.delay
 

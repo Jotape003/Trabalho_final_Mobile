@@ -65,89 +65,92 @@ fun HomeScreen(
                 CircularProgressIndicator()
             }
         } else {
-            Column(modifier = Modifier.fillMaxSize()) {
+            if (filhos.isEmpty()) {
                 Text(
-                    text = "Seus vínculos",
+                    text = "Não há vinculos com você!",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
                         .padding(top = 8.dp, bottom = 12.dp)
                 )
+            } else {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Seus vínculos",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(top = 8.dp, bottom = 12.dp)
+                    )
 
-                LazyColumn(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filhos) { filho ->
-                        val nomeEscola = nomesEscolas[filho.id] ?: "Escola desconhecida"
-                        val nomeTurma = nomesTurmas[filho.id] ?: "Turma desconhecida"
+                    LazyColumn(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filhos) { filho ->
+                            val nomeEscola = nomesEscolas[filho.id] ?: "Escola desconhecida"
+                            val nomeTurma = nomesTurmas[filho.id] ?: "Turma desconhecida"
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    navHostController.navigate("ChildrenDetails/${filho.id}")
-                                },
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Row(
+                            Card(
                                 modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Image(
-                                    painter = painterResource(id = filho.foto),
-                                    contentDescription = "Foto de ${filho.name}",
-                                    modifier = Modifier
-                                        .size(72.dp)
-                                        .clip(RoundedCornerShape(36.dp)),
-                                    contentScale = ContentScale.Crop
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        navHostController.navigate("ChildrenDetails/${filho.id}")
+                                    },
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
-
-                                Spacer(modifier = Modifier.width(20.dp))
-
-                                Column(
-                                    modifier = Modifier.weight(1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = filho.name,
-                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.width(20.dp))
 
-                                    Text(
-                                        text = nomeEscola,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = filho.name,
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
 
-                                    Text(
-                                        text = "Idade: ${filho.idade}",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                    Text(
-                                        text = "Turma: $nomeTurma",
-                                        style = MaterialTheme.typography.bodySmall
+                                        Text(
+                                            text = nomeEscola,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Text(
+                                            text = "Idade: ${filho.idade}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = "Turma: $nomeTurma",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = "Detalhes",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(28.dp)
                                     )
                                 }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Detalhes",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
                             }
                         }
                     }

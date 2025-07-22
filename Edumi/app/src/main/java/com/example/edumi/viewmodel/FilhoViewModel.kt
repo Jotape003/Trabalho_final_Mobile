@@ -17,7 +17,7 @@ class FilhoViewModel : ViewModel() {
     val filho: LiveData<Filho?> = _filho
 
     private val _listaFilhos = MutableLiveData<List<Filho>>()
-    val listaFilhos: LiveData<List<Filho>> = _listaFilhos
+    val listaFilhos: LiveData<List<Filho>> get() = _listaFilhos
 
     private var listenerRegistration: ListenerRegistration? = null
 

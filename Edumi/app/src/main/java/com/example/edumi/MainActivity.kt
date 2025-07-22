@@ -33,7 +33,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.edumi.datastore.Preferences
-import com.example.edumi.models.resp
 import com.example.edumi.ui.components.BottomNavigationBar
 import com.example.edumi.ui.components.DrawerContent
 import com.example.edumi.ui.components.TopBar
@@ -53,12 +52,15 @@ import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.edumi.data.AuthRepository
+import com.example.edumi.models.Responsavel
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
@@ -101,13 +103,6 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
-            val filhoViewModel: FilhoViewModel = viewModel()
-            val listaFilhos by filhoViewModel.listaFilhos.observeAsState(emptyList())
-
-            LaunchedEffect(resp.id) {
-                filhoViewModel.ouvirFilhosDoResponsavel(resp.id)
-            }
-
             val eventoViewModel: EventoViewModel = viewModel()
             val eventos = eventoViewModel.eventos
             val context = LocalContext.current
@@ -130,22 +125,31 @@ class MainActivity : ComponentActivity() {
             )
             val isLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
 
+            val filhoViewModel: FilhoViewModel = viewModel()
+            val listaFilhos by filhoViewModel.listaFilhos.observeAsState(emptyList())
+            var resp by remember { mutableStateOf<Responsavel>(Responsavel.empty()) }
+            val userVersion by authViewModel.userVersion
+
+            LaunchedEffect(userVersion) {
+                authViewModel.getUserInfos { responsavel ->
+                    resp = responsavel
+                    if(resp.id.isNotEmpty()){
+                        filhoViewModel.ouvirFilhosDoResponsavel(resp.id)
+                    }
+                }
+            }
+
             LaunchedEffect(isLoggedIn) {
                 if (isLoggedIn) {
-                    // Se o usuário estiver logado, navegue para a tela 'home'
-                    // e limpe o back stack para que ele não possa voltar para login
                     navController.navigate("home") {
                         popUpTo("login") {
                             inclusive = true // Inclui "login" na limpeza
                         }
                     }
                 } else {
-                    // Se o usuário não estiver logado, certifique-se de que ele esteja na tela de login
-                    // A menos que já esteja em registro/esqueci a senha
                     drawerState.close()
                     if (currentRoute != "register" && currentRoute != "forgotPassword" && currentRoute != "login") {
                         navController.navigate("login") {
-                            // Limpa o back stack ao sair do app logado e voltar para a tela de login
                             popUpTo(navController.graph.startDestinationId) {
                                 inclusive = true
                             }
@@ -414,11 +418,11 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 composable("profile") {
-                                    ProfileScreen()
+                                    ProfileScreen(authViewModel)
                                 }
 
                                 composable("child-form") {
-                                    ChildForm(navController)
+                                    ChildForm(navController, responsavel = resp)
                                 }
                             }
                         }

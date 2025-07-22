@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.edumi.R
 import com.example.edumi.models.Filho
 import com.example.edumi.models.Escola
+import com.example.edumi.models.Responsavel
 import com.example.edumi.models.Turma
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +46,8 @@ fun ChildForm(
     navController: NavController,
     filhoViewModel: FilhoViewModel = viewModel(),
     escolaViewModel: EscolaViewModel = viewModel(),
-    turmaViewModel: TurmaViewModel = viewModel()
+    turmaViewModel: TurmaViewModel = viewModel(),
+    responsavel: Responsavel,
 ) {
     val context = LocalContext.current
 
@@ -62,12 +64,6 @@ fun ChildForm(
     var turmaSelecionada by remember { mutableStateOf<Turma?>(null) }
     var turmaInput by remember { mutableStateOf("") }
     var turmaExpanded by remember { mutableStateOf(false) }
-
-    val launcher = rememberLauncherForActivityResult(contract = GetContent()) { uri: Uri? ->
-        if (uri != null) {
-            fotoUri = uri
-        }
-    }
 
     LaunchedEffect(Unit) {
         escolaViewModel.ouvirEscolas()
@@ -112,33 +108,6 @@ fun ChildForm(
                 null
             }
         }
-
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Foto do filho",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .clickable { launcher.launch("image/*") },
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Image(
-                painter = painterResource(id = R.drawable.ic_default_avatar),
-                contentDescription = "Foto padrão",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .clickable { launcher.launch("image/*") },
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        TextButton(onClick = { launcher.launch("image/*") }) {
-            Text("Escolher Foto")
-        }
-
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
@@ -261,8 +230,7 @@ fun ChildForm(
                         idade = idade.toInt(),
                         idEscola = escolaSelecionada!!.id,
                         idTurma = turmaSelecionada!!.id,
-                        foto = if (fotoUri == null) R.drawable.ic_default_avatar else 0,
-                        idResponsavel = "99"
+                        idResponsavel = responsavel.id
                     )
                     filhoViewModel.salvarFilho(novoFilho)
                     navController.navigate("home")
