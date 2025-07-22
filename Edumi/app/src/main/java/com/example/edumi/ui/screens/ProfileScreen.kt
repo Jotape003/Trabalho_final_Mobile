@@ -1,8 +1,5 @@
 package com.example.edumi.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -26,21 +21,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.edumi.models.resp
-import kotlinx.coroutines.delay
+import com.example.edumi.models.Responsavel
+import com.example.edumi.viewmodel.AuthViewModel
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(viewModel: AuthViewModel) {
     var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
+    var resp by remember { mutableStateOf<Responsavel>(Responsavel.empty()) }
+    val userVersion by viewModel.userVersion
+
+    LaunchedEffect(userVersion) {
+        viewModel.getUserInfos { responsavel ->
+            resp = responsavel
+            isLoading = false
+        }
     }
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -52,14 +49,6 @@ fun ProfileScreen() {
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = resp.imageRes),
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(128.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
 
             Spacer(
                 modifier = Modifier.height(16.dp)

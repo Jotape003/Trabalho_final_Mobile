@@ -7,23 +7,11 @@ data class Responsavel(
     val name: String,
     val email: String,
     val telefone: String,
-    val imageRes: Int,
     val sexo: String,
     val pais: String
 
-){
+) {
     companion object {
-        fun empty() = Responsavel("", "", "", "", 0, "", "")
+        fun empty() = Responsavel("", "", "", "", "", "")
     }
 }
-
-
-val resp = Responsavel(
-    id = "99",
-    name = "Pedro Joao",
-    email = "pedrojoao1@email.com",
-    telefone = "(88) 9 9977-4885",
-    imageRes = R.drawable.responsavel,
-    sexo = "Masculino",
-    pais = "Brasil"
-)

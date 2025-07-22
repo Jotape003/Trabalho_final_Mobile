@@ -19,7 +19,7 @@ class AuthRepository {
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     private val _isUserLoggedIn = MutableLiveData<Boolean>()
-    val isUserLoggedIn : LiveData<Boolean> get() = _isUserLoggedIn
+    val isUserLoggedIn: LiveData<Boolean> get() = _isUserLoggedIn
 
     init {
         // Inicializa o estado de login e observa futuras mudanças
@@ -33,8 +33,14 @@ class AuthRepository {
     }
 
 
-
-    suspend fun registerUser(email: String, password: String, name: String, telefone : String, sexo : String, pais : String): Boolean {
+    suspend fun registerUser(
+        email: String,
+        password: String,
+        name: String,
+        telefone: String,
+        sexo: String,
+        pais: String
+    ): Boolean {
         return try {
             val res = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = res.user?.uid
@@ -103,18 +109,17 @@ class AuthRepository {
                     name = snapshot.getString("name") ?: "",
                     email = snapshot.getString("email") ?: "",
                     telefone = snapshot.getString("telefone") ?: "",
-                    imageRes = snapshot.getLong("imageRes")?.toInt() ?: 0,
                     sexo = snapshot.getString("sexo") ?: "",
                     pais = snapshot.getString("pais") ?: ""
                 )
             } else {
                 // UID é nulo, retorna um Responsavel vazio
-                Responsavel("", "", "", "", 0, "", "")
+                Responsavel("", "", "", "", "", "")
             }
         } catch (e: Exception) {
             Log.e("authRepository", "Erro ao resgatar informações do usuário: $e")
             // Em caso de erro, também retorna um Responsavel vazio
-            Responsavel("", "", "", "", 0, "", "")
+            Responsavel("", "", "", "", "", "")
         }
     }
 
@@ -139,7 +144,7 @@ class AuthRepository {
                 val userRef = firestore.collection("users").document(uid)
                 val snapshot = userRef.get().await()
 
-                if(!snapshot.exists()){
+                if (!snapshot.exists()) {
                     val userData = hashMapOf(
                         "uid" to uid,
                         "name" to name,
@@ -156,7 +161,7 @@ class AuthRepository {
         }
     }
 
-    fun logout(){
+    fun logout() {
         auth.signOut()
     }
 

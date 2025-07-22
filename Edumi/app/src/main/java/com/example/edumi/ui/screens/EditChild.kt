@@ -106,22 +106,13 @@ fun EditChildScreen(
         }
     }
 
-
-
-    val bitmap = remember(fotoUri) {
-        try {
-            fotoUri?.let {
-                if (Build.VERSION.SDK_INT < 28) {
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver, it)
-                    ImageDecoder.decodeBitmap(source)
-                }
-            }
-        } catch (e: Exception) {
-            null
+    LaunchedEffect(turmas, filho) {
+        if (filho != null && turmaSelecionada == null) {
+            turmaSelecionada = turmas.find { it.id == filho!!.idTurma }
+            turmaInput = turmaSelecionada?.nome ?: ""
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -153,28 +144,6 @@ fun EditChildScreen(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
-
-                if (bitmap != null) {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Foto do filho",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .clickable { launcher.launch("image/*") },
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_default_avatar),
-                        contentDescription = "Foto padrão",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .clickable { launcher.launch("image/*") },
-                        contentScale = ContentScale.Crop
-                    )
-                }
 
                 TextButton(onClick = { launcher.launch("image/*") }) {
                     Text("Escolher Foto")
@@ -240,8 +209,7 @@ fun EditChildScreen(
                     }
                 }
 
-                // TURMA — só aparece se uma escola foi selecionada
-                if (escolaFoiSelecionadaManualmente == true) {
+
                     val turmasFiltradas = turmas.filter { it.idEscola == escolaSelecionada!!.id }
 
                     ExposedDropdownMenuBox(
@@ -275,7 +243,6 @@ fun EditChildScreen(
                             }
                         }
                     }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -293,6 +260,11 @@ fun EditChildScreen(
                                 idEscola = escolaSelecionada!!.id,
                                 idTurma = turmaSelecionada!!.id,
                             )
+                            if(filhoAtualizado == filho){
+                                Toast.makeText(context, "Nenhuma alteração feita!", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                                return@Button
+                            }
                             filhoViewModel.atualizarFilho(filhoAtualizado) { sucesso ->
                                 if (sucesso) {
                                     Toast.makeText(context, "Filho atualizado!", Toast.LENGTH_SHORT).show()

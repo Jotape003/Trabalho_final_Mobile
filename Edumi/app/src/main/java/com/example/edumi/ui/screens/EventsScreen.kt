@@ -26,7 +26,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.edumi.models.Filho
 import com.google.accompanist.pager.*
-import com.example.edumi.models.resp
 import com.example.edumi.viewmodel.EventoViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
