@@ -62,6 +62,7 @@ import com.example.edumi.data.AuthRepository
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
 import com.example.edumi.ui.screens.ChildForm
+import com.example.edumi.ui.screens.EditChildScreen
 import com.example.edumi.ui.screens.ForgotPasswordScreen
 import com.example.edumi.ui.screens.LoginScreen
 import com.example.edumi.ui.theme.PrimaryColorPairs
@@ -319,6 +320,19 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                 }
+
+                                composable("EditChild/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    if (id != null) {
+                                        EditChildScreen(
+                                            navController = navController,
+                                            filhoId = id
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+
                                 composable("settings") {
                                     SettingsScreen(
                                         isDarkTheme = isDarkTheme,
