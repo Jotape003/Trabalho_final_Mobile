@@ -16,8 +16,11 @@ import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Public
 import com.example.edumi.ui.screens.CustomTextField
 import com.example.edumi.viewmodel.AuthViewModel
 
@@ -26,6 +29,9 @@ fun RegisterScreen(viewModel: AuthViewModel, navController: NavController) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var telefone by remember { mutableStateOf("") }
+    var sexo by remember { mutableStateOf("") }
+    var pais by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -70,13 +76,34 @@ fun RegisterScreen(viewModel: AuthViewModel, navController: NavController) {
                     isPassword = true
                 )
 
+                CustomTextField(
+                    value = telefone,
+                    onValueChange = { telefone = it },
+                    label = "Telefone",
+                    icon = Icons.Filled.Phone,
+                )
+
+                CustomTextField(
+                    value = sexo,
+                    onValueChange = { sexo = it },
+                    label = "Sexo",
+                    icon = Icons.Filled.Person,
+                )
+
+                CustomTextField(
+                    value = pais,
+                    onValueChange = { pais = it },
+                    label = "País de origem",
+                    icon = Icons.Filled.Public,
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = {
-                        viewModel.register(email, password, name) { success ->
+                        viewModel.register(email, password, name, telefone, sexo, pais) { success ->
                             if (success) {
-                                navController.navigate("login") // Navega para login após sucesso
+                                navController.navigate("home") // Navega para home após sucesso
                             } else {
                                 Toast.makeText(context, "Erro no cadastro", Toast.LENGTH_LONG).show()
                             }

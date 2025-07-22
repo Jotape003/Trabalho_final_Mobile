@@ -10,7 +10,12 @@ data class Responsavel(
     val imageRes: Int,
     val sexo: String,
     val pais: String
-)
+
+){
+    companion object {
+        fun empty() = Responsavel("", "", "", "", 0, "", "")
+    }
+}
 
 
 val resp = Responsavel(

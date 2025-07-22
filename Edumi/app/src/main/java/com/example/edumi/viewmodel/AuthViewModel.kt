@@ -1,10 +1,14 @@
 package com.example.edumi.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.edumi.data.AuthRepository
+import com.example.edumi.models.Responsavel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import kotlinx.coroutines.launch
 
@@ -16,11 +20,18 @@ import kotlinx.coroutines.launch
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     // Variáveis de callback para retorno do resultado do login e registro
+    var currentUserInfo = mutableStateOf<Responsavel?>(null)
+        private set
     var loginResult: ((Boolean) -> Unit)? = null
     var registerResult: ((Boolean) -> Unit)? = null
     val isUserLoggedIn: LiveData<Boolean> = repository.isUserLoggedIn
 
+    var userVersion = mutableIntStateOf(0)
+        private set
 
+    fun notifyUserChanged() {
+        userVersion.intValue++
+    }
     /**
      * Método para registrar um novo usuário utilizando email e senha.
      * Após a criação do usuário no Firebase Authentication, seus dados são armazenados no Firestore.
@@ -30,9 +41,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
      * @param name Nome do usuário
      * @param onResult Callback que retorna `true` se o registro for bem-sucedido, `false` caso contrário.
      */
-    fun register(email: String, password: String, name: String, onResult: (Boolean) -> Unit) {
+    fun register(email: String, password: String, name: String, telefone : String, sexo : String, pais : String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val success = repository.registerUser(email, password, name)
+            val success = repository.registerUser(email, password, name, telefone, sexo, pais)
             onResult(success) // Retorna o resultado para a UI
         }
     }
@@ -79,6 +90,14 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun getUserInfos(onResult: (Responsavel) -> Unit) {
+        viewModelScope.launch {
+            val resp = repository.getUserInfos()
+            currentUserInfo.value = resp
+            userVersion.intValue++ // <-- Notifica que houve mudança
+            onResult(resp)
+        }
+    }
     /**
      * Método para realizar login com uma conta Google.
      * Utiliza o ID Token recebido após a autenticação com o Google Sign-In.
@@ -104,12 +123,20 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         return repository.getGoogleSignInClient(context)
     }
 
+    fun fetchUserInfos() {
+        viewModelScope.launch {
+            val resp = repository.getUserInfos()
+            currentUserInfo.value = resp
+        }
+    }
+
     /**
      * Método para realizar logout do usuário.
      * Essa função desloga o usuário do Firebase e o remove da sessão ativa.
      */
     fun logout() {
         repository.logout()
+        currentUserInfo.value = null  // Limpa dados do usuário atual
     }
 
 

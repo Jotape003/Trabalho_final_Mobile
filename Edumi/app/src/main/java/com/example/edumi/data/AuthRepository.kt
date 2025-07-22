@@ -10,6 +10,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.example.edumi.R
+import com.example.edumi.models.Responsavel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -31,7 +32,9 @@ class AuthRepository {
         return isUserLogged() // Usa a sua função existente no repositório
     }
 
-    suspend fun registerUser(email: String, password: String, name: String): Boolean {
+
+
+    suspend fun registerUser(email: String, password: String, name: String, telefone : String, sexo : String, pais : String): Boolean {
         return try {
             val res = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = res.user?.uid
@@ -40,6 +43,9 @@ class AuthRepository {
                     "uid" to uid,
                     "name" to name,
                     "email" to email,
+                    "telefone" to telefone,
+                    "sexo" to sexo,
+                    "pais" to pais,
                     "created_at" to System.currentTimeMillis()
                 )
                 firestore.collection("users").document(uid).set(user).await()
@@ -83,6 +89,32 @@ class AuthRepository {
         } catch (e: Exception) {
             Log.e("authRepository", "Error ao resgatar o nome do usuário: $e")
             null
+        }
+    }
+
+    suspend fun getUserInfos(): Responsavel {
+        return try {
+            val uid = auth.currentUser?.uid
+
+            if (uid != null) {
+                val snapshot = firestore.collection("users").document(uid).get().await()
+                Responsavel(
+                    id = uid,
+                    name = snapshot.getString("name") ?: "",
+                    email = snapshot.getString("email") ?: "",
+                    telefone = snapshot.getString("telefone") ?: "",
+                    imageRes = snapshot.getLong("imageRes")?.toInt() ?: 0,
+                    sexo = snapshot.getString("sexo") ?: "",
+                    pais = snapshot.getString("pais") ?: ""
+                )
+            } else {
+                // UID é nulo, retorna um Responsavel vazio
+                Responsavel("", "", "", "", 0, "", "")
+            }
+        } catch (e: Exception) {
+            Log.e("authRepository", "Erro ao resgatar informações do usuário: $e")
+            // Em caso de erro, também retorna um Responsavel vazio
+            Responsavel("", "", "", "", 0, "", "")
         }
     }
 

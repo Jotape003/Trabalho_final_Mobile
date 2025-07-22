@@ -1,5 +1,6 @@
 package com.example.edumi.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,11 +38,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.edumi.models.resp
+import com.example.edumi.models.Responsavel
 import com.example.edumi.viewmodel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun DrawerContent(
     navController: NavController,
@@ -50,7 +52,13 @@ fun DrawerContent(
     viewModel: AuthViewModel
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
-
+    val userVersion by viewModel.userVersion
+    var resp by remember { mutableStateOf<Responsavel>(Responsavel.empty()) }
+    LaunchedEffect(userVersion) {
+        viewModel.getUserInfos { responsavel ->
+            resp = responsavel
+        }
+    }
     Surface(
         modifier = Modifier
             .fillMaxHeight()
@@ -63,20 +71,9 @@ fun DrawerContent(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-
             Column(
                 modifier = Modifier.padding(start = 16.dp)
             ) {
-                Image(
-                    painter = painterResource(id = resp.imageRes),
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .size(50.dp)
-
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
 
                 Text(
                     text = resp.name,
@@ -234,3 +231,5 @@ fun DrawerContent(
         }
     }
 }
+
+
