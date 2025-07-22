@@ -32,20 +32,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.edumi.models.comunicados
+import com.example.edumi.models.Filho
 import com.example.edumi.models.resp
+import com.example.edumi.viewmodel.ComunicadoViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AllNotifications(navController: NavHostController, context: Context) {
-    val allComunicados = remember { comunicados }
-    val allFilhos = remember { resp.filhos }
+fun AllNotifications(
+    navController: NavHostController,
+    context: Context,
+    filhos: List<Filho>,
+    viewModel: ComunicadoViewModel = viewModel()
+) {
+    val allComunicados = remember { viewModel.comunicados }
+    val allFilhos = remember { filhos }
 
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+        delay(2000)
         isLoading = false
     }
 

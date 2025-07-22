@@ -15,21 +15,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.edumi.models.Filho
-import com.example.edumi.models.comunicados
+import com.example.edumi.viewmodel.ComunicadoViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ChildrenNotifications(navController: NavHostController, context: Context, filho: Filho) {
+fun ChildrenNotifications(
+    navController: NavHostController,
+    context: Context,
+    filho: Filho,
+    viewModel: ComunicadoViewModel = viewModel()
+) {
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+        delay(2000)
         isLoading = false
     }
 
-    // Filtrar comunicados apenas do filho atual
+    val comunicados = viewModel.comunicados
     val comunicadosDoFilho = comunicados.filter { it.idFilho == filho.id }
     AnimatedContent(
         targetState = isLoading,

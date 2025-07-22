@@ -1,7 +1,13 @@
 package com.example.edumi
 
+import FilhoViewModel
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -17,8 +23,8 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -46,83 +52,192 @@ import com.example.edumi.ui.screens.SettingsScreen
 import com.example.edumi.ui.theme.EdumiTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
-import com.example.edumi.models.eventos
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.edumi.data.AuthRepository
 import com.example.edumi.notifications.agendarNotificacaoEvento
 import com.example.edumi.notifications.cancelarNotificacaoEvento
+import com.example.edumi.ui.screens.ChildForm
+import com.example.edumi.ui.screens.EditChildScreen
+import com.example.edumi.ui.screens.ForgotPasswordScreen
+import com.example.edumi.ui.screens.LoginScreen
+import com.example.edumi.ui.theme.PrimaryColorPairs
+import com.example.edumi.ui.view.RegisterScreen
+import com.example.edumi.viewmodel.AuthViewModel
+import com.example.edumi.viewmodel.AuthViewModelFactory
+import com.example.edumi.viewmodel.EventoViewModel
 
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                100
+            )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Eventos"
+            val descriptionText = "Um evento está próximo, cheque seu calendário!"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("EVENTOS_CHANNEL", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
         super.onCreate(savedInstanceState)
         setContent {
+            val filhoViewModel: FilhoViewModel = viewModel()
+            val listaFilhos by filhoViewModel.listaFilhos.observeAsState(emptyList())
+
+            LaunchedEffect(resp.id) {
+                filhoViewModel.ouvirFilhosDoResponsavel(resp.id)
+            }
+
+            val eventoViewModel: EventoViewModel = viewModel()
+            val eventos = eventoViewModel.eventos
             val context = LocalContext.current
             val navController = rememberNavController()
+            val currentBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = currentBackStackEntry?.destination?.route
             val preferences = remember { Preferences(context) }
             val drawerState = rememberDrawerState(DrawerValue.Closed)
             val scope = rememberCoroutineScope()
             val isDarkTheme by preferences.isDarkMode.collectAsState(initial = false)
             val isNotificationsEnabled by preferences.isNotificationsEnabled.collectAsState(initial = false)
+            val primaryColorName by preferences.primaryColorName.collectAsState(initial = "Azul")
 
-            EdumiTheme(darkTheme = isDarkTheme) {
+            val primaryColorPair =
+                PrimaryColorPairs.find { it.name == primaryColorName } ?: PrimaryColorPairs[0]
+
+            val repository = AuthRepository()
+            val authViewModel = ViewModelProvider(this, AuthViewModelFactory(repository)).get(
+                AuthViewModel::class.java
+            )
+            val isLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
+
+            LaunchedEffect(isLoggedIn) {
+                if (isLoggedIn) {
+                    // Se o usuário estiver logado, navegue para a tela 'home'
+                    // e limpe o back stack para que ele não possa voltar para login
+                    navController.navigate("home") {
+                        popUpTo("login") {
+                            inclusive = true // Inclui "login" na limpeza
+                        }
+                    }
+                } else {
+                    // Se o usuário não estiver logado, certifique-se de que ele esteja na tela de login
+                    // A menos que já esteja em registro/esqueci a senha
+                    drawerState.close()
+                    if (currentRoute != "register" && currentRoute != "forgotPassword" && currentRoute != "login") {
+                        navController.navigate("login") {
+                            // Limpa o back stack ao sair do app logado e voltar para a tela de login
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            }
+            EdumiTheme(
+                darkTheme = isDarkTheme,
+                primaryColorPair = primaryColorPair
+            ) {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController, drawerState, scope)
+                        DrawerContent(navController, drawerState, scope, authViewModel)
                     },
                     content = {
                         Scaffold(
                             topBar = {
-                                TopBar(
-                                    onOpenDrawer = { scope.launch { drawerState.open() } },
-                                    onSearchClick = {
-                                        // TEM QUE CONFIGURAR BEM AQUI
-                                    },
-                                    navController = navController
-                                )
+                                if (isLoggedIn) {
+                                    TopBar(
+                                        onOpenDrawer = { scope.launch { drawerState.open() } },
+                                        onSearchClick = { /* seu código */ },
+                                        navController = navController
+                                    )
+                                }
                             },
-
-                            bottomBar = { BottomNavigationBar(navController) },
-
+                            bottomBar = {
+                                if (isLoggedIn) {
+                                    BottomNavigationBar(navController)
+                                }
+                            },
                             floatingActionButton = {
-                                FloatingActionButton(
-                                    onClick = {},
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                                if (isLoggedIn && currentRoute != "child-form") {
+                                    FloatingActionButton(
+                                        onClick = {
+                                            navController.navigate("child-form")
+                                        },
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                                    }
                                 }
                             }
-
                         ) { innerPadding ->
                             NavHost(
                                 navController = navController,
-                                startDestination = "home",
+                                startDestination = "login",
                                 modifier = Modifier.padding(innerPadding)
 
                             ) {
+                                composable("login") {
+                                    LoginScreen(authViewModel, navController)
+                                }
+                                composable("register") {
+                                    RegisterScreen(
+                                        authViewModel,
+                                        navController
+                                    )
+                                }
+                                composable("forgotPassword") {
+                                    ForgotPasswordScreen(
+                                        authViewModel,
+                                        navController
+                                    )
+                                }
                                 composable("home") {
                                     HomeScreen(
                                         navController,
-                                        context = context
+                                        context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
                                 composable("events") {
                                     AllChildrenEvents(
                                         navController = navController,
                                         context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
-                                composable("notice"){
+                                composable("notice") {
                                     AllNotifications(
                                         navController = navController,
                                         context = context,
+                                        filhos = listaFilhos
                                     )
                                 }
                                 composable("ChildrenDetails/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenDetails(
@@ -135,7 +250,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenScores/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenScores(
@@ -149,7 +264,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenNotifications/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenNotifications(
@@ -163,7 +278,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenEvents/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenEvents(
@@ -177,7 +292,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenFrequency/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenFrequency(
@@ -192,7 +307,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 composable("ChildrenTask/{id}") { backStackEntry ->
                                     val id = backStackEntry.arguments?.getString("id")
-                                    val filho = resp.filhos.find { it.id.toString() == id }
+                                    val filho = listaFilhos.find { it.id.toString() == id }
 
                                     if (filho != null) {
                                         ChildrenTask(
@@ -205,10 +320,24 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                 }
+
+                                composable("EditChild/{id}") { backStackEntry ->
+                                    val id = backStackEntry.arguments?.getString("id")
+                                    if (id != null) {
+                                        EditChildScreen(
+                                            navController = navController,
+                                            filhoId = id
+                                        )
+                                    } else {
+                                        Text("Filho não encontrado.")
+                                    }
+                                }
+
                                 composable("settings") {
                                     SettingsScreen(
                                         isDarkTheme = isDarkTheme,
                                         isNotificationsEnabled = isNotificationsEnabled,
+                                        primaryColorPair = primaryColorPair,
                                         onThemeToggle = {
                                             scope.launch {
                                                 preferences.setDarkMode(!isDarkTheme)
@@ -216,17 +345,65 @@ class MainActivity : ComponentActivity() {
                                         },
                                         onNotificationsToggle = {
                                             scope.launch {
-                                                preferences.setNotificationsEnabled(!isNotificationsEnabled)
+                                                val novoEstado = !isNotificationsEnabled
+                                                preferences.setNotificationsEnabled(novoEstado)
+
+                                                if (novoEstado) {
+                                                    eventos
+                                                        .map { it.second }
+                                                        .filter {
+                                                            try {
+                                                                val formatterData =
+                                                                    java.time.format.DateTimeFormatter.ofPattern(
+                                                                        "yyyy-MM-dd"
+                                                                    )
+                                                                val formatterHora =
+                                                                    java.time.format.DateTimeFormatter.ofPattern(
+                                                                        "HH:mm"
+                                                                    )
+
+                                                                val data =
+                                                                    java.time.LocalDate.parse(
+                                                                        it.data,
+                                                                        formatterData
+                                                                    )
+                                                                val horaInicio =
+                                                                    java.time.LocalTime.parse(
+                                                                        it.horaInicio,
+                                                                        formatterHora
+                                                                    )
+                                                                val dateTime =
+                                                                    java.time.LocalDateTime.of(
+                                                                        data,
+                                                                        horaInicio
+                                                                    )
+                                                                dateTime.isAfter(java.time.LocalDateTime.now())
+                                                            } catch (e: Exception) {
+                                                                false
+                                                            }
+                                                        }
+                                                        .forEach { evento ->
+                                                            agendarNotificacaoEvento(
+                                                                context,
+                                                                evento
+                                                            )
+                                                        }
+                                                } else {
+                                                    eventos
+                                                        .map { it.second }
+                                                        .forEach { evento ->
+                                                            cancelarNotificacaoEvento(
+                                                                context,
+                                                                evento
+                                                            )
+                                                        }
+                                                }
+
                                             }
-                                            Log.d("VSF", "$isNotificationsEnabled")
-                                            if (isNotificationsEnabled){
-                                                eventos.forEach { evento ->
-                                                    agendarNotificacaoEvento(context, evento)
-                                                }
-                                            } else {
-                                                eventos.forEach { evento ->
-                                                    cancelarNotificacaoEvento(context, evento)
-                                                }
+                                        },
+                                        onPrimaryColorSelected = { newColorPair ->
+                                            scope.launch {
+                                                preferences.setPrimaryColorName(newColorPair.name)
                                             }
                                         }
                                     )
@@ -239,12 +416,10 @@ class MainActivity : ComponentActivity() {
                                 composable("profile") {
                                     ProfileScreen()
                                 }
-                                //composable("events") { SubscribedEventsScreen(navController) }
-                                //composable("favorites") { FavoritesScreen(navController) }
-                                //composable("eventDetails/{eventId}") { backStackEntry ->
-                                //   val eventId = backStackEntry.arguments?.getString("eventId")
-                                // EventDetailsScreen(eventId = eventId)
-                                //}
+
+                                composable("child-form") {
+                                    ChildForm(navController)
+                                }
                             }
                         }
                     })

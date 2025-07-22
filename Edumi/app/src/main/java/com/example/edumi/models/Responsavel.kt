@@ -3,38 +3,24 @@ package com.example.edumi.models
 import com.example.edumi.R
 
 data class Responsavel(
-    val id: Int,
+    val id: String,
     val name: String,
-    val filhos: List<Filho>,
     val email: String,
     val telefone: String,
     val imageRes: Int,
     val sexo: String,
     val pais: String
-)
+
+){
+    companion object {
+        fun empty() = Responsavel("", "", "", "", 0, "", "")
+    }
+}
 
 
 val resp = Responsavel(
-    id = 1,
+    id = "99",
     name = "Pedro Joao",
-    filhos = listOf(
-        Filho(
-            id = 1,
-            name = "Roberto Facundo",
-            idade = 10,
-            escola = "Universidade Federal do Ceará",
-            foto = R.drawable.robertofacundo,
-            turma = "5º Ano - Turma A"
-        ),
-        Filho(
-            id = 2,
-            name = "Ana Januária",
-            idade = 12,
-            escola = "Seminário Batista do Cariri",
-            foto = R.drawable.anajanuaria,
-            turma = "7° Ano - Turma A"
-        )
-    ),
     email = "pedrojoao1@email.com",
     telefone = "(88) 9 9977-4885",
     imageRes = R.drawable.responsavel,

@@ -1,5 +1,7 @@
 package com.example.edumi.ui.screens
 
+import EscolaViewModel
+import TurmaViewModel
 import android.content.Context
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
@@ -11,31 +13,52 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.edumi.models.resp
+import com.example.edumi.models.Filho
 import kotlinx.coroutines.delay
 
 @Composable
-fun HomeScreen(navHostController: NavHostController, context: Context) {
+fun HomeScreen(
+    navHostController: NavHostController,
+    context: Context,
+    filhos: List<Filho>,
+    escolaViewModel: EscolaViewModel = viewModel(),
+    turmaViewModel: TurmaViewModel = viewModel()
+) {
+    val nomesEscolas = remember { mutableStateMapOf<String, String>() }
+    val nomesTurmas = remember { mutableStateMapOf<String, String>() }
     var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000) // Simula delay
+
+    LaunchedEffect(filhos) {
+        escolaViewModel.ouvirEscolas()
+        for (filho in filhos) {
+            escolaViewModel.getNomeEscolaPorId(filho.idEscola) { nome ->
+                nomesEscolas[filho.id] = nome
+            }
+            turmaViewModel.getNomeTurmaPorId(filho.idTurma) { nome ->
+                nomesTurmas[filho.id] = nome
+            }
+        }
+
+        while (filhos.any { filho ->
+                nomesEscolas[filho.id].isNullOrBlank() || nomesTurmas[filho.id].isNullOrBlank()
+            }) {
+            delay(100)
+        }
+
         isLoading = false
     }
+
     Crossfade(targetState = isLoading, label = "Loading") { loading ->
         if (loading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -55,7 +78,10 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(resp.filhos) { filho ->
+                    items(filhos) { filho ->
+                        val nomeEscola = nomesEscolas[filho.id] ?: "Escola desconhecida"
+                        val nomeTurma = nomesTurmas[filho.id] ?: "Turma desconhecida"
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -97,19 +123,19 @@ fun HomeScreen(navHostController: NavHostController, context: Context) {
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = filho.escola,
+                                        text = nomeEscola,
                                         style = MaterialTheme.typography.bodyMedium,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
                                         text = "Idade: ${filho.idade}",
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                     Text(
-                                        text = "Turma: ${filho.turma}",
+                                        text = "Turma: $nomeTurma",
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }

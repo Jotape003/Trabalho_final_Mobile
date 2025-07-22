@@ -38,18 +38,31 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun EdumiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
+    primaryColorPair: PrimaryColorPair? = null,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val defaultDarkColors = DarkColorScheme
+    val defaultLightColors = LightColorScheme
+
+    fun applyPrimaryColor(baseScheme: androidx.compose.material3.ColorScheme): androidx.compose.material3.ColorScheme {
+        val primaryColor = if (primaryColorPair != null) {
+            if (darkTheme) primaryColorPair.dark else primaryColorPair.light
+        } else {
+            baseScheme.primary
+        }
+        return baseScheme.copy(primary = primaryColor)
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            val dynamicScheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            applyPrimaryColor(dynamicScheme)
         }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> applyPrimaryColor(defaultDarkColors)
+        else -> applyPrimaryColor(defaultLightColors)
     }
 
     MaterialTheme(
