@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -64,7 +65,6 @@ class FilhoViewModel : ViewModel() {
                     _listaFilhos.value = emptyList()
                     return@addSnapshotListener
                 }
-
                 val filhos = snapshots?.documents?.mapNotNull { it.toObject(Filho::class.java) }
                 _listaFilhos.value = filhos ?: emptyList()
             }
