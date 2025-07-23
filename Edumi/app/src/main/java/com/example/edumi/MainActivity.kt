@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     gesturesEnabled = true,
                     drawerContent = {
-                        DrawerContent(navController, drawerState, scope, authViewModel)
+                        DrawerContent(navController, drawerState, scope, authViewModel ,resp)
                     },
                     content = {
                         Scaffold(
@@ -418,7 +418,7 @@ class MainActivity : ComponentActivity() {
                                 }
 
                                 composable("profile") {
-                                    ProfileScreen(authViewModel)
+                                    ProfileScreen(resp)
                                 }
 
                                 composable("child-form") {
