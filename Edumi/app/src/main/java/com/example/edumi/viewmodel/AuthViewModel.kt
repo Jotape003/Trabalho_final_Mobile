@@ -26,11 +26,11 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     var registerResult: ((Boolean) -> Unit)? = null
     val isUserLoggedIn: LiveData<Boolean> = repository.isUserLoggedIn
 
-    var userVersion = mutableIntStateOf(0)
+    var userVersion = mutableStateOf(false)
         private set
 
     fun notifyUserChanged() {
-        userVersion.intValue++
+        userVersion.value = !userVersion.value
     }
     /**
      * Método para registrar um novo usuário utilizando email e senha.
@@ -94,7 +94,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             val resp = repository.getUserInfos()
             currentUserInfo.value = resp
-            userVersion.intValue++ // <-- Notifica que houve mudança
+            userVersion.value = !userVersion.value // <-- Notifica que houve mudança
             onResult(resp)
         }
     }
