@@ -67,7 +67,7 @@ fun HomeScreen(
         } else {
             if (filhos.isEmpty()) {
                 Text(
-                    text = "Não há vinculos com você!",
+                    text = "Você não possui vinculos!",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(horizontal = 24.dp)

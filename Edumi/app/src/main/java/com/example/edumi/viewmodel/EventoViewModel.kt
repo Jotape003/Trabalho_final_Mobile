@@ -10,6 +10,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 class EventoViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val eventosCollection = db.collection("eventos")
+    var isLoading by mutableStateOf(true)
+        private set
+
 
     var eventos by mutableStateOf<List<Pair<String, Evento>>>(emptyList())
         private set
@@ -31,6 +34,8 @@ class EventoViewModel : ViewModel() {
             eventos = snapshots.map { doc ->
                 doc.id to doc.toObject(Evento::class.java)
             }
+            isLoading = false
         }
+
     }
 }

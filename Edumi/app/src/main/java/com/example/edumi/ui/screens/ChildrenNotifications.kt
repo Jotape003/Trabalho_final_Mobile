@@ -29,11 +29,7 @@ fun ChildrenNotifications(
     filho: Filho,
     viewModel: ComunicadoViewModel = viewModel()
 ) {
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
-    }
+    var isLoading = viewModel.isLoading
 
     val comunicados = viewModel.comunicados
     val comunicadosDoFilho = comunicados.filter { it.idFilho == filho.id }

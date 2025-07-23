@@ -29,17 +29,14 @@ import kotlinx.coroutines.delay
 @Composable
 fun ChildrenScores(
     navController: NavController,
-    context: Context, filho: Filho,
+    context: Context,
+    filho: Filho,
     viewModel: NotaViewModel = viewModel()
 ) {
-    var isLoading by remember { mutableStateOf(true) }
+
     val notas = viewModel.notas
     val notasFiltradas = notas.filter { it.idFilho == filho.id }
-
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
-    }
+    val isLoading = viewModel.isLoading
 
     AnimatedContent(
         targetState = isLoading,

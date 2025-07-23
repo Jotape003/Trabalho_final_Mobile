@@ -38,11 +38,7 @@ fun ChildrenFrequency(
 ) {
     var frequencias = viewModel.frequencias
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
-    }
+    var isLoading = viewModel.isLoading
 
     val frequenciasFilho = frequencias.filter { it.idFilho == filho.id }
     val initialPage = 500

@@ -35,11 +35,8 @@ fun ChildrenTask(
 ) {
     val tasks = viewModel.tarefas
     val tasksDoFilho = tasks.filter { it.idFilho == filho.id }
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
-    }
+    var isLoading = viewModel.isLoading
+
 
     AnimatedContent(
         targetState = isLoading,

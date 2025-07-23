@@ -33,12 +33,14 @@ import java.util.Locale
 @OptIn(ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
 @Composable
 fun ChildrenEvents(navController: NavController, context: Context, filho: Filho, viewModel: EventoViewModel = viewModel()) {
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading = viewModel.isLoading
     var eventos = viewModel.eventos
     val eventosFilho = eventos.filter { (_, evento) -> evento.idFilho == filho.id }
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
 
     fun indexToYearMonth(index: Int): YearMonth {
         val current = YearMonth.now()
@@ -46,10 +48,6 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho,
         return current.plusMonths(offset.toLong())
     }
 
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
-    }
 
     AnimatedContent(
         targetState = isLoading,
@@ -139,7 +137,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho,
                             items(days) { (date, isFromOtherMonth) ->
                                 val isSelected = date == selectedDate
                                 val hasEvent = eventosFilho.any { (_, evento) ->
-                                    LocalDate.parse(evento.data) == date
+                                    LocalDate.parse(evento.data, formatter) == date
                                 }
 
 
@@ -180,7 +178,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho,
                         Spacer(modifier = Modifier.height(16.dp))
 
                         val eventosDoDia = eventosFilho.filter { (_, evento) ->
-                            LocalDate.parse(evento.data) == selectedDate
+                            LocalDate.parse(evento.data, formatter) == selectedDate
                         }
 
                         Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
