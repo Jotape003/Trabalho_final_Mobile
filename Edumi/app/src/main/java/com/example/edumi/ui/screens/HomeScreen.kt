@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -18,12 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.edumi.models.Filho
 import kotlinx.coroutines.delay
 
@@ -67,7 +68,7 @@ fun HomeScreen(
         } else {
             if (filhos.isEmpty()) {
                 Text(
-                    text = "Você não possui vinculos!",
+                    text = "Você não possui vínculos!",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
@@ -109,7 +110,17 @@ fun HomeScreen(
                                         .fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Spacer(modifier = Modifier.width(20.dp))
+
+                                    Image(
+                                        painter = rememberAsyncImagePainter(filho.imgUrl),
+                                        contentDescription = "Foto do filho",
+                                        modifier = Modifier
+                                            .size(76.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+
+                                    Spacer(modifier = Modifier.width(16.dp))
 
                                     Column(
                                         modifier = Modifier.weight(1f)
