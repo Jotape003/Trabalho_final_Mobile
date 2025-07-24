@@ -17,12 +17,12 @@ fun agendarNotificacaoEvento(context: Context, evento: Evento) {
     val localDate = LocalDate.parse(evento.data)
     val localTime = LocalTime.parse(evento.horaInicio)
 
-    val zonedDateTime = LocalDateTime.of(
-        localDate,
-        localTime.minusMinutes(1)
+    val triggerDateTime = LocalDateTime.of(
+        localDate.minusDays(1),
+        localTime
     ).atZone(ZoneId.systemDefault())
 
-    val triggerTimeMillis = zonedDateTime.toInstant().toEpochMilli()
+    val triggerTimeMillis = triggerDateTime.toInstant().toEpochMilli()
 
     val intent = Intent(context, NotificationReceiver::class.java).apply {
         putExtra("TITULO", evento.titulo)

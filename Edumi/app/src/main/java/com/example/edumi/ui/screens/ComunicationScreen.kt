@@ -25,10 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,13 +42,11 @@ fun AllNotifications(
     filhos: List<Filho>,
     viewModel: ComunicadoViewModel = viewModel()
 ) {
-    val allComunicados = remember { viewModel.comunicados }
-    val allFilhos = remember { filhos }
+    val allComunicados = viewModel.comunicados
+    var isLoading = viewModel.isLoading
 
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        delay(2000)
-        isLoading = false
+    LaunchedEffect(filhos) {
+        viewModel.escutarComunicados(filhos)
     }
 
     AnimatedContent(
@@ -82,7 +76,7 @@ fun AllNotifications(
                     } else {
                         items(allComunicados.size) { index ->
                             val comunicado = allComunicados[index]
-                            val nomeDoFilho = allFilhos.find { it.id == comunicado.idFilho }?.name
+                            val nomeDoFilho = filhos.find { it.id == comunicado.idFilho }?.name
                                 ?: "Filho Desconhecido"
 
                             Card(

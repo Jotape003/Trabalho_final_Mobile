@@ -35,7 +35,11 @@ import java.util.Locale
 fun ChildrenEvents(navController: NavController, context: Context, filho: Filho, viewModel: EventoViewModel = viewModel()) {
     var isLoading = viewModel.isLoading
     var eventos = viewModel.eventos
-    val eventosFilho = eventos.filter { (_, evento) -> evento.idFilho == filho.id }
+
+    LaunchedEffect(filho.id) {
+        viewModel.carregarEventos(listOf(filho))
+    }
+
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
@@ -136,7 +140,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho,
                         ) {
                             items(days) { (date, isFromOtherMonth) ->
                                 val isSelected = date == selectedDate
-                                val hasEvent = eventosFilho.any { (_, evento) ->
+                                val hasEvent = eventos.any { (_, evento) ->
                                     LocalDate.parse(evento.data, formatter) == date
                                 }
 
@@ -177,7 +181,7 @@ fun ChildrenEvents(navController: NavController, context: Context, filho: Filho,
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        val eventosDoDia = eventosFilho.filter { (_, evento) ->
+                        val eventosDoDia = eventos.filter { (_, evento) ->
                             LocalDate.parse(evento.data, formatter) == selectedDate
                         }
 

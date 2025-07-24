@@ -16,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.edumi.models.Filho
 import com.example.edumi.viewmodel.ComunicadoViewModel
+import com.example.edumi.viewmodel.EventoViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -32,7 +34,11 @@ fun ChildrenNotifications(
     var isLoading = viewModel.isLoading
 
     val comunicados = viewModel.comunicados
-    val comunicadosDoFilho = comunicados.filter { it.idFilho == filho.id }
+
+    LaunchedEffect(filho.id) {
+        viewModel.escutarComunicados(listOf(filho))
+    }
+
     AnimatedContent(
         targetState = isLoading,
         transitionSpec = {
@@ -53,8 +59,8 @@ fun ChildrenNotifications(
                 )
 
                 LazyColumn {
-                    items(comunicadosDoFilho.size) { index ->
-                        val comunicado = comunicadosDoFilho[index]
+                    items(comunicados.size) { index ->
+                        val comunicado = comunicados[index]
 
                         Card(
                             modifier = Modifier

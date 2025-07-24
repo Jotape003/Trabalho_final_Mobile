@@ -46,6 +46,12 @@ fun AllChildrenEvents(
 ) {
     var isLoading = viewModel.isLoading
     var eventos = viewModel.eventos
+
+    LaunchedEffect(filhos) {
+        // A chamada agora passa o contexto para o agendamento de notificações
+        viewModel.carregarEventos(filhos)
+    }
+
     val initialPage = 500
     val pagerState = rememberPagerState(initialPage = initialPage)
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
