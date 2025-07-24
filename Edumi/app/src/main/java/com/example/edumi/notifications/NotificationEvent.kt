@@ -12,26 +12,30 @@ import android.provider.Settings
 import android.net.Uri
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 fun agendarNotificacaoEvento(context: Context, evento: Evento) {
-    val localDate = LocalDate.parse(evento.data)
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+    val localDate = LocalDate.parse(evento.data, formatter)
     val localTime = LocalTime.parse(evento.horaInicio)
 
-    val zonedDateTime = LocalDateTime.of(
-        localDate,
-        localTime.minusMinutes(1)
+    val triggerDateTime = LocalDateTime.of(
+        localDate.minusDays(1),
+        localTime
     ).atZone(ZoneId.systemDefault())
 
-    val triggerTimeMillis = zonedDateTime.toInstant().toEpochMilli()
+    val triggerTimeMillis = triggerDateTime.toInstant().toEpochMilli()
 
     val intent = Intent(context, NotificationReceiver::class.java).apply {
+        putExtra("TIPO", "EVENTO")
         putExtra("TITULO", evento.titulo)
-        putExtra("ID_EVENTO", evento.idFilho)
+        putExtra("ID_EVENTO", evento.id.hashCode())
     }
 
     val pendingIntent = PendingIntent.getBroadcast(
         context,
-        evento.idFilho.hashCode(),
+        evento.id.hashCode(),
         intent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
@@ -66,7 +70,7 @@ fun cancelarNotificacaoEvento(context: Context, evento: Evento) {
     val intent = Intent(context, NotificationReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(
         context,
-        evento.idFilho.hashCode(),
+        evento.id.hashCode(),
         intent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
     )
