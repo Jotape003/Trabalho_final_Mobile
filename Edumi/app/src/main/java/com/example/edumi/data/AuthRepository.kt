@@ -133,7 +133,7 @@ class AuthRepository {
 
     suspend fun loginWithGoogle(idToken: String): Boolean {
         return try {
-            val credential = GoogleAuthProvider.getCredential(idToken, "")
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
             val res = auth.signInWithCredential(credential).await()
             val user = res.user
             user?.let {
@@ -149,7 +149,11 @@ class AuthRepository {
                         "uid" to uid,
                         "name" to name,
                         "email" to email,
-                        "created_at" to System.currentTimeMillis()
+                        "created_at" to System.currentTimeMillis(),
+                        "pais" to "brasileiro",
+                        "telefone" to "4002-8922",
+                        "sexo" to "masculino"
+
                     )
                     userRef.set(userData).await()
                 }
