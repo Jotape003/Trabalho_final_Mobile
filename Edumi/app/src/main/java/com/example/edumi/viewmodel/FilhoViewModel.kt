@@ -1,3 +1,5 @@
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,12 +23,16 @@ class FilhoViewModel : ViewModel() {
 
     private var listenerRegistration: ListenerRegistration? = null
 
-    fun salvarFilho(filho: Filho) {
+    fun salvarFilho(filho: Filho, fotoUri: Uri?, context: Context) {
         val collectionRef = db.collection("filhos")
         val docRef = if (filho.id.isNotEmpty()) {
             collectionRef.document(filho.id)
         } else {
             collectionRef.document()
+        }
+
+        if (fotoUri != null) {
+            uploadImage(context, fotoUri)
         }
 
         val filhoParaSalvar = if (filho.id.isEmpty()) {
