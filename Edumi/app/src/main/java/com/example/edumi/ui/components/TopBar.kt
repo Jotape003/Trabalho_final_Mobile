@@ -63,13 +63,5 @@ fun TopBar(
                 }
             }
         },
-        actions = {
-            IconButton(onClick = onSearchClick) {
-                Icon(Icons.Default.Search, contentDescription = "Pesquisar")
-            }
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Opções")
-            }
-        }
     )
 }
