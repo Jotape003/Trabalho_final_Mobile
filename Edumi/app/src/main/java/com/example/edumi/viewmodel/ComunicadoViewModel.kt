@@ -1,11 +1,14 @@
 package com.example.edumi.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.edumi.models.Comunicado
 import com.example.edumi.models.Filho
+import com.example.edumi.notifications.agendarNotificacaoComunicado
+import com.example.edumi.notifications.cancelarNotificacaoComunicado
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
@@ -42,6 +45,18 @@ class ComunicadoViewModel : ViewModel() {
 
                 comunicados = snapshot?.toObjects(Comunicado::class.java) ?: emptyList()
             }
+    }
+
+    fun agendamentoDeComunicados(habilitar: Boolean, context: Context) {
+        if (habilitar) {
+            comunicados.forEach { comunicado ->
+                agendarNotificacaoComunicado(context, comunicado)
+            }
+        } else {
+            comunicados.forEach { comunicado ->
+                cancelarNotificacaoComunicado(context, comunicado)
+            }
+        }
     }
 
     override fun onCleared() {

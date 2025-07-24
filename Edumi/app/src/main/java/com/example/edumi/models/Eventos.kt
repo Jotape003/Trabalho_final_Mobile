@@ -6,5 +6,6 @@ data class Evento(
     val data: String = "",
     val horaInicio: String = "",
     val horaFim: String = "",
-    val local: String = ""
+    val local: String = "",
+    val id: String = ""
 )

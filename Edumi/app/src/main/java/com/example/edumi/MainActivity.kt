@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -71,6 +72,7 @@ import com.example.edumi.ui.theme.PrimaryColorPairs
 import com.example.edumi.ui.view.RegisterScreen
 import com.example.edumi.viewmodel.AuthViewModel
 import com.example.edumi.viewmodel.AuthViewModelFactory
+import com.example.edumi.viewmodel.ComunicadoViewModel
 import com.example.edumi.viewmodel.EventoViewModel
 
 
@@ -104,6 +106,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val eventoViewModel: EventoViewModel = viewModel()
+            val comunicadoViewModel: ComunicadoViewModel = viewModel()
             val eventos = eventoViewModel.eventos
             val context = LocalContext.current
             val navController = rememberNavController()
@@ -124,6 +127,7 @@ class MainActivity : ComponentActivity() {
                 AuthViewModel::class.java
             )
             val isLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
+
 
             val filhoViewModel: FilhoViewModel = viewModel()
             val listaFilhos by filhoViewModel.listaFilhos.observeAsState(emptyList())
@@ -157,6 +161,21 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
+            LaunchedEffect(listaFilhos) {
+                if (listaFilhos.isNotEmpty()) {
+                    Log.d("MainActivity", "Lista de filhos atualizada. A carregar eventos...")
+                    eventoViewModel.carregarEventos(listaFilhos)
+                    comunicadoViewModel.escutarComunicados(listaFilhos)
+                }
+            }
+
+            LaunchedEffect(isNotificationsEnabled, eventos) {
+                if (isNotificationsEnabled && eventos.isNotEmpty()) {
+                    eventoViewModel.agendamentoDeNotificacoes(true, context)
+                }
+            }
+
             EdumiTheme(
                 darkTheme = isDarkTheme,
                 primaryColorPair = primaryColorPair
@@ -352,57 +371,8 @@ class MainActivity : ComponentActivity() {
                                                 val novoEstado = !isNotificationsEnabled
                                                 preferences.setNotificationsEnabled(novoEstado)
 
-                                                if (novoEstado) {
-                                                    eventos
-                                                        .map { it.second }
-                                                        .filter {
-                                                            try {
-                                                                val formatterData =
-                                                                    java.time.format.DateTimeFormatter.ofPattern(
-                                                                        "yyyy-MM-dd"
-                                                                    )
-                                                                val formatterHora =
-                                                                    java.time.format.DateTimeFormatter.ofPattern(
-                                                                        "HH:mm"
-                                                                    )
-
-                                                                val data =
-                                                                    java.time.LocalDate.parse(
-                                                                        it.data,
-                                                                        formatterData
-                                                                    )
-                                                                val horaInicio =
-                                                                    java.time.LocalTime.parse(
-                                                                        it.horaInicio,
-                                                                        formatterHora
-                                                                    )
-                                                                val dateTime =
-                                                                    java.time.LocalDateTime.of(
-                                                                        data,
-                                                                        horaInicio
-                                                                    )
-                                                                dateTime.isAfter(java.time.LocalDateTime.now())
-                                                            } catch (e: Exception) {
-                                                                false
-                                                            }
-                                                        }
-                                                        .forEach { evento ->
-                                                            agendarNotificacaoEvento(
-                                                                context,
-                                                                evento
-                                                            )
-                                                        }
-                                                } else {
-                                                    eventos
-                                                        .map { it.second }
-                                                        .forEach { evento ->
-                                                            cancelarNotificacaoEvento(
-                                                                context,
-                                                                evento
-                                                            )
-                                                        }
-                                                }
-
+                                                eventoViewModel.agendamentoDeNotificacoes(novoEstado, context)
+                                                comunicadoViewModel.agendamentoDeComunicados(novoEstado, context)
                                             }
                                         },
                                         onPrimaryColorSelected = { newColorPair ->
