@@ -1,5 +1,6 @@
 package com.example.edumi.ui.screens
 
+import com.example.edumi.R
 import EscolaViewModel
 import TurmaViewModel
 import android.content.Context
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -111,8 +113,14 @@ fun HomeScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
+                                    val painter = if (!filho.imgUrl.isNullOrBlank()) {
+                                        rememberAsyncImagePainter(filho.imgUrl)
+                                    } else {
+                                        painterResource(id = R.drawable.ic_default_avatar)
+                                    }
+
                                     Image(
-                                        painter = rememberAsyncImagePainter(filho.imgUrl),
+                                        painter = painter,
                                         contentDescription = "Foto do filho",
                                         modifier = Modifier
                                             .size(76.dp)
