@@ -24,7 +24,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // 3. Constrói a notificação
         val notification = NotificationCompat.Builder(context, "EVENTOS_CHANNEL")
-            .setSmallIcon(R.drawable.responsavel) // Use um ícone branco e transparente
+            .setSmallIcon(R.drawable.edumi_icon) // Use um ícone branco e transparente
             .setContentTitle(tituloDaNotificacao)
             .setContentText(titulo) // O 'titulo' do evento/comunicado vai aqui
             .setPriority(NotificationCompat.PRIORITY_HIGH)

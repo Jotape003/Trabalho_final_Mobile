@@ -1,4 +1,6 @@
 import android.util.Log
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,7 +24,7 @@ class FilhoViewModel : ViewModel() {
 
     private var listenerRegistration: ListenerRegistration? = null
 
-    fun salvarFilho(filho: Filho) {
+    fun salvarFilho(filho: Filho, fotoUri: Uri?, context: Context) {
         val collectionRef = db.collection("filhos")
         val docRef = if (filho.id.isNotEmpty()) {
             collectionRef.document(filho.id)
@@ -30,15 +32,32 @@ class FilhoViewModel : ViewModel() {
             collectionRef.document()
         }
 
-        val filhoParaSalvar = if (filho.id.isEmpty()) {
-            filho.copy(id = docRef.id)
-        } else {
-            filho
-        }
+        val filhoId = if (filho.id.isEmpty()) docRef.id else filho.id
 
-        docRef.set(filhoParaSalvar)
-            .addOnSuccessListener { _saveStatus.value = true }
-            .addOnFailureListener { _saveStatus.value = false }
+        if (fotoUri != null) {
+            uploadImage(context, fotoUri,
+                onSuccess = { imageUrl ->
+                    val filhoComFoto = filho.copy(id = filhoId, imgUrl = imageUrl)
+
+                    docRef.set(filhoComFoto)
+                        .addOnSuccessListener { _saveStatus.value = true }
+                        .addOnFailureListener { _saveStatus.value = false }
+                },
+                onFailure = {
+                    _saveStatus.value = false
+                }
+            )
+        } else {
+            val filhoParaSalvar = if (filho.id.isEmpty()) {
+                filho.copy(id = filhoId)
+            } else {
+                filho
+            }
+
+            docRef.set(filhoParaSalvar)
+                .addOnSuccessListener { _saveStatus.value = true }
+                .addOnFailureListener { _saveStatus.value = false }
+        }
     }
 
     fun buscarFilhoPorId(id: String) {
@@ -70,21 +89,28 @@ class FilhoViewModel : ViewModel() {
             }
     }
 
-    fun atualizarFilho(filho: Filho, callback: (Boolean) -> Unit) {
-        val dadosAtualizados = mapOf(
-            "name" to filho.name,
-            "idade" to filho.idade,
-            "idEscola" to filho.idEscola,
-            "idTurma" to filho.idTurma
-        )
+    fun atualizarFilho(filho: Filho, fotoUri: Uri?, context: Context, callback: (Boolean) -> Unit) {
+        val docRef = db.collection("filhos").document(filho.id)
 
-        db.collection("filhos")
-            .document(filho.id)
-            .update(dadosAtualizados)
-            .addOnSuccessListener { callback(true) }
-            .addOnFailureListener { callback(false) }
+        if (fotoUri != null) {
+            uploadImage(context, fotoUri,
+                onSuccess = { imageUrl ->
+                    val filhoComFotoAtualizada = filho.copy(imgUrl = imageUrl)
+
+                    docRef.set(filhoComFotoAtualizada)
+                        .addOnSuccessListener { callback(true) }
+                        .addOnFailureListener { callback(false) }
+                },
+                onFailure = {
+                    callback(false)
+                }
+            )
+        } else {
+            docRef.set(filho)
+                .addOnSuccessListener { callback(true) }
+                .addOnFailureListener { callback(false) }
+        }
     }
-
 
     fun deletarFilho(filhoId: String, callback: (Boolean) -> Unit) {
         db.collection("filhos")

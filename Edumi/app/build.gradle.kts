@@ -50,6 +50,10 @@ android {
 
 dependencies {
 
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("androidx.core:core-ktx:1.12.0")
@@ -66,7 +70,7 @@ dependencies {
     implementation ("androidx.core:core-ktx:1.10.1")
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-auth-ktx") // se usar autenticação
+    implementation("com.google.firebase:firebase-auth-ktx")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
 
 
