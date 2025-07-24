@@ -110,6 +110,9 @@ fun ChildForm(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = "Adicionar vínculo",
             style = MaterialTheme.typography.titleMedium,
@@ -141,14 +144,9 @@ fun ChildForm(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Selecionar foto",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable {
-                    imagePickerLauncher.launch("image/*")
-                }
-            )
+            TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                Text("Escolher Foto")
+            }
         }
 
         OutlinedTextField(

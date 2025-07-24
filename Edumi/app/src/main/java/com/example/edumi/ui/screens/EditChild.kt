@@ -20,9 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cake
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,9 +35,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.edumi.R
-import com.example.edumi.models.Filho
 import com.example.edumi.models.Escola
+import com.example.edumi.models.Filho
 import com.example.edumi.models.Turma
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,10 +70,27 @@ fun EditChildScreen(
 
     var escolaFoiSelecionadaManualmente by remember { mutableStateOf(false) }
 
-
     val launcher = rememberLauncherForActivityResult(contract = GetContent()) { uri: Uri? ->
         if (uri != null) {
             fotoUri = uri
+        }
+    }
+
+    val contexto = LocalContext.current
+
+    val bitmap = remember(fotoUri) {
+        fotoUri?.let { uri ->
+            try {
+                if (Build.VERSION.SDK_INT < 28) {
+                    MediaStore.Images.Media.getBitmap(contexto.contentResolver, uri)
+                } else {
+                    val source = ImageDecoder.createSource(contexto.contentResolver, uri)
+                    ImageDecoder.decodeBitmap(source)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
         }
     }
 
@@ -92,7 +108,6 @@ fun EditChildScreen(
         filhoViewModel.buscarFilhoPorId(filhoId)
     }
 
-    // Preenche os campos quando o filho é carregado
     LaunchedEffect(filho) {
         filho?.let {
             nome = it.name
@@ -123,7 +138,6 @@ fun EditChildScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (filho == null) {
-            // Carregando...
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -144,6 +158,33 @@ fun EditChildScreen(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
+
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Foto do filho",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .clickable { launcher.launch("image/*") },
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    val painter = if (!filho?.imgUrl.isNullOrBlank()) {
+                        rememberAsyncImagePainter(filho?.imgUrl)
+                    } else {
+                        painterResource(id = R.drawable.ic_default_avatar)
+                    }
+                    Image(
+                        painter = painter,
+                        contentDescription = "Foto do filho",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .clickable { launcher.launch("image/*") },
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 TextButton(onClick = { launcher.launch("image/*") }) {
                     Text("Escolher Foto")
@@ -202,47 +243,45 @@ fun EditChildScreen(
                                     escolaInput = escola.nome
                                     escolaExpanded = false
                                     escolaFoiSelecionadaManualmente = true
-
                                 }
                             )
                         }
                     }
                 }
 
+                val turmasFiltradas = turmas.filter { it.idEscola == escolaSelecionada?.id }
 
-                    val turmasFiltradas = turmas.filter { it.idEscola == escolaSelecionada!!.id }
+                ExposedDropdownMenuBox(
+                    expanded = turmaExpanded,
+                    onExpandedChange = { turmaExpanded = !turmaExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = turmaInput,
+                        onValueChange = { turmaInput = it },
+                        label = { Text("Turma") },
+                        readOnly = true,
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                            .clickable { turmaExpanded = true }
+                    )
 
-                    ExposedDropdownMenuBox(
+                    DropdownMenu(
                         expanded = turmaExpanded,
-                        onExpandedChange = { turmaExpanded = !turmaExpanded }
+                        onDismissRequest = { turmaExpanded = false }
                     ) {
-                        OutlinedTextField(
-                            value = turmaInput,
-                            onValueChange = { turmaInput = it },
-                            label = { Text("Turma") },
-                            readOnly = true,
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                                .clickable { turmaExpanded = true }
-                        )
-
-                        DropdownMenu(
-                            expanded = turmaExpanded,
-                            onDismissRequest = { turmaExpanded = false }
-                        ) {
-                            turmasFiltradas.forEach { turma ->
-                                DropdownMenuItem(
-                                    text = { Text(turma.nome) },
-                                    onClick = {
-                                        turmaSelecionada = turma
-                                        turmaInput = turma.nome
-                                        turmaExpanded = false
-                                    }
-                                )
-                            }
+                        turmasFiltradas.forEach { turma ->
+                            DropdownMenuItem(
+                                text = { Text(turma.nome) },
+                                onClick = {
+                                    turmaSelecionada = turma
+                                    turmaInput = turma.nome
+                                    turmaExpanded = false
+                                }
+                            )
                         }
                     }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -260,21 +299,25 @@ fun EditChildScreen(
                                 idEscola = escolaSelecionada!!.id,
                                 idTurma = turmaSelecionada!!.id,
                             )
-                            if(filhoAtualizado == filho){
-                                Toast.makeText(context, "Nenhuma alteração feita!", Toast.LENGTH_SHORT).show()
+                            if (filhoAtualizado == filho && fotoUri == null) {
+                                Toast.makeText(context, "Nenhuma alteração feita!", Toast.LENGTH_SHORT)
+                                    .show()
                                 navController.popBackStack()
                                 return@Button
                             }
-                            filhoViewModel.atualizarFilho(filhoAtualizado) { sucesso ->
+                            filhoViewModel.atualizarFilho(filhoAtualizado, fotoUri, context) { sucesso ->
                                 if (sucesso) {
-                                    Toast.makeText(context, "Filho atualizado!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Vínculo atualizado!", Toast.LENGTH_SHORT)
+                                        .show()
                                     navController.popBackStack()
                                 } else {
-                                    Toast.makeText(context, "Erro ao atualizar", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Erro ao atualizar", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             }
                         } else {
-                            Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     },
                     modifier = Modifier
@@ -289,11 +332,10 @@ fun EditChildScreen(
                     onClick = {
                         filhoViewModel.deletarFilho(filho!!.id) { sucesso ->
                             if (sucesso) {
-                                Toast.makeText(context, "Filho deletado!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Vínculo deletado!", Toast.LENGTH_SHORT).show()
                                 navController.navigate("home") {
-                                    popUpTo(0) { inclusive = true } // Limpa toda a backstack
+                                    popUpTo(0) { inclusive = true }
                                 }
-
                             } else {
                                 Toast.makeText(context, "Erro ao deletar", Toast.LENGTH_SHORT).show()
                             }
@@ -305,7 +347,7 @@ fun EditChildScreen(
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Excluir filho")
+                    Text("Excluir vínculo")
                 }
             }
         }

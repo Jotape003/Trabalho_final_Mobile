@@ -14,7 +14,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val id = intent?.getIntExtra("ID_EVENTO", 0) ?: 0
 
         val notification = NotificationCompat.Builder(context, "EVENTOS_CHANNEL")
-            .setSmallIcon(R.drawable.logo_google)
+            .setSmallIcon(R.drawable.edumi_icon)
             .setContentTitle("Lembrete de Evento!")
             .setContentText(titulo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
