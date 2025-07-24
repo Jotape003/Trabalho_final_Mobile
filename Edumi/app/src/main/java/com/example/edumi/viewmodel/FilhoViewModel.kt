@@ -31,20 +31,34 @@ class FilhoViewModel : ViewModel() {
             collectionRef.document()
         }
 
+        val filhoId = if (filho.id.isEmpty()) docRef.id else filho.id
+
         if (fotoUri != null) {
-            uploadImage(context, fotoUri)
-        }
+            uploadImage(context, fotoUri,
+                onSuccess = { imageUrl ->
+                    val filhoComFoto = filho.copy(id = filhoId, imgUrl = imageUrl)
 
-        val filhoParaSalvar = if (filho.id.isEmpty()) {
-            filho.copy(id = docRef.id)
+                    docRef.set(filhoComFoto)
+                        .addOnSuccessListener { _saveStatus.value = true }
+                        .addOnFailureListener { _saveStatus.value = false }
+                },
+                onFailure = {
+                    _saveStatus.value = false
+                }
+            )
         } else {
-            filho
-        }
+            val filhoParaSalvar = if (filho.id.isEmpty()) {
+                filho.copy(id = filhoId)
+            } else {
+                filho
+            }
 
-        docRef.set(filhoParaSalvar)
-            .addOnSuccessListener { _saveStatus.value = true }
-            .addOnFailureListener { _saveStatus.value = false }
+            docRef.set(filhoParaSalvar)
+                .addOnSuccessListener { _saveStatus.value = true }
+                .addOnFailureListener { _saveStatus.value = false }
+        }
     }
+
 
     fun buscarFilhoPorId(id: String) {
         db.collection("filhos").document(id)

@@ -3,17 +3,23 @@ import android.net.Uri
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-fun uploadImage(context: Context, uri: Uri) {
+fun uploadImage(
+    context: Context,
+    uri: Uri,
+    onSuccess: (String) -> Unit,
+    onFailure: (String) -> Unit
+) {
     val client = OkHttpClient()
     val privateKey = "private_e1t+AYHMO9DNsXgeyL5RqfwyZjs="
 
     val file = uriToFile(context, uri)
     if (file == null) {
-        println("Falha: não foi possível converter Uri para File")
+        onFailure("Falha: não foi possível converter Uri para File")
         return
     }
 
@@ -42,17 +48,21 @@ fun uploadImage(context: Context, uri: Uri) {
         try {
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
-                println("Sucesso! ${response.body?.string()}")
+                val body = response.body?.string()
+                val json = JSONObject(body ?: "")
+                val imageUrl = json.getString("url")
+                onSuccess(imageUrl)
             } else {
-                println("Erro: ${response.code}")
+                onFailure("Erro: ${response.code}")
             }
         } catch (e: Exception) {
-            println("Falha: ${e.message}")
+            onFailure("Falha: ${e.message}")
         } finally {
             file.delete()
         }
     }.start()
 }
+
 
 fun uriToFile(context: Context, uri: Uri): File? {
     return try {

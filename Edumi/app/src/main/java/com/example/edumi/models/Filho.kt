@@ -6,5 +6,6 @@ data class Filho(
     val idade: Int = 0,
     val idEscola: String = "",
     val idTurma: String = "",
-    val idResponsavel: String = ""
+    val idResponsavel: String = "",
+    val imgUrl: String = ""
 )
