@@ -22,15 +22,13 @@ class NotificationReceiver : BroadcastReceiver() {
             else -> "Aviso Edumi"
         }
 
-        // 3. Constrói a notificação
         val notification = NotificationCompat.Builder(context, "EVENTOS_CHANNEL")
-            .setSmallIcon(R.drawable.edumi_icon) // Use um ícone branco e transparente
+            .setSmallIcon(R.drawable.edumi_icon)
             .setContentTitle(tituloDaNotificacao)
-            .setContentText(titulo) // O 'titulo' do evento/comunicado vai aqui
+            .setContentText(titulo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
 
-        // 4. Exibe a notificação (com verificação de permissão)
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             NotificationManagerCompat.from(context).notify(id, notification)
         }
